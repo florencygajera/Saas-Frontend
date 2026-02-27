@@ -107,7 +107,7 @@ export const useRouteGuard = (pathname: string) => {
           ? 'CUSTOMER' 
           : null;
 
-    if (rolePrefix && role !== rolePrefix) {
+    if (role && rolePrefix && role !== rolePrefix) {
       redirectToHome(role);
     }
   }, [user, role, loading, pathname]);

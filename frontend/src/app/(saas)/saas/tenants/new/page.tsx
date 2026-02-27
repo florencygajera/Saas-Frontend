@@ -165,7 +165,7 @@ export default function NewTenantPage() {
                 <label className="block text-sm font-medium text-gray-700">Plan</label>
                 <select
                   {...register('plan')}
-                  class1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500Name="mt- py-2 px-3 border"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2 px-3 border"
                 >
                   <option value="">Select a plan</option>
                   <option value="free">Free</option>
