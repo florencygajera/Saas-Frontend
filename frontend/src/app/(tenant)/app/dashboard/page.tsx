@@ -44,7 +44,7 @@ export default function TenantDashboard() {
           <h1 className="text-2xl font-bold text-gray-900">
             Welcome, {user?.tenant_name || 'Business'}!
           </h1>
-          <p className="text-gray-600">Here's your business overview</p>
+          <p className="text-gray-600">Here&apos;s your business overview</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

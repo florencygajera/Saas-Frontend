@@ -18,25 +18,24 @@ export default function TenantStatsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchStats = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await saasApi.getTenantStats(tenantId);
-      setStats(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load tenant stats');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await saasApi.getTenantStats(tenantId);
+        setStats(data);
+      } catch (err: any) {
+        setError(err.message || 'Failed to load tenant stats');
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchStats();
   }, [tenantId]);
 
   if (loading) return <Loading message="Loading tenant stats..." />;
-  if (error) return <ErrorState message={error} onRetry={fetchStats} />;
+  if (error) return <ErrorState message={error} />;
 
   return (
     <div>
