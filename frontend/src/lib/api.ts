@@ -66,6 +66,11 @@ export const saasApi = {
     return response.data;
   },
 
+  getTenant: async (tenantId: string): Promise<Tenant> => {
+    const response = await api.get<Tenant>(`/api/v1/saas/tenants/${tenantId}`);
+    return response.data;
+  },
+
   createTenant: async (data: {
     name: string;
     slug: string;
@@ -102,6 +107,11 @@ export const tenantApi = {
     return response.data;
   },
 
+  getService: async (serviceId: string): Promise<Service> => {
+    const response = await api.get<Service>(`/api/v1/services/${serviceId}`);
+    return response.data;
+  },
+
   createService: async (data: {
     name: string;
     description?: string;
@@ -113,13 +123,13 @@ export const tenantApi = {
   },
 
   updateService: async (serviceId: string, data: {
-    name?: string;
+    name: string;
     description?: string;
-    price?: number;
-    duration_minutes?: number;
+    price: number;
+    duration_minutes: number;
     is_active?: boolean;
   }): Promise<Service> => {
-    const response = await api.patch<Service>(`/api/v1/services/${serviceId}`, data);
+    const response = await api.put<Service>(`/api/v1/services/${serviceId}`, data);
     return response.data;
   },
 
@@ -130,6 +140,11 @@ export const tenantApi = {
   // Staff
   getStaff: async (): Promise<Staff[]> => {
     const response = await api.get<Staff[]>('/api/v1/staff');
+    return response.data;
+  },
+
+  getStaffMember: async (staffId: string): Promise<Staff> => {
+    const response = await api.get<Staff>(`/api/v1/staff/${staffId}`);
     return response.data;
   },
 
@@ -144,13 +159,13 @@ export const tenantApi = {
   },
 
   updateStaff: async (staffId: string, data: {
-    name?: string;
-    email?: string;
+    name: string;
+    email: string;
     phone?: string;
     is_active?: boolean;
     services?: string[];
   }): Promise<Staff> => {
-    const response = await api.patch<Staff>(`/api/v1/staff/${staffId}`, data);
+    const response = await api.put<Staff>(`/api/v1/staff/${staffId}`, data);
     return response.data;
   },
 
@@ -164,6 +179,11 @@ export const tenantApi = {
     return response.data;
   },
 
+  getCustomer: async (customerId: string): Promise<Customer> => {
+    const response = await api.get<Customer>(`/api/v1/customers/${customerId}`);
+    return response.data;
+  },
+
   createCustomer: async (data: {
     name: string;
     email: string;
@@ -174,11 +194,11 @@ export const tenantApi = {
   },
 
   updateCustomer: async (customerId: string, data: {
-    name?: string;
-    email?: string;
+    name: string;
+    email: string;
     phone?: string;
   }): Promise<Customer> => {
-    const response = await api.patch<Customer>(`/api/v1/customers/${customerId}`, data);
+    const response = await api.put<Customer>(`/api/v1/customers/${customerId}`, data);
     return response.data;
   },
 
@@ -193,6 +213,11 @@ export const tenantApi = {
     return response.data;
   },
 
+  getAppointment: async (appointmentId: string): Promise<Appointment> => {
+    const response = await api.get<Appointment>(`/api/v1/appointments/${appointmentId}`);
+    return response.data;
+  },
+
   updateAppointmentStatus: async (appointmentId: string, status: string): Promise<Appointment> => {
     const response = await api.patch<Appointment>(`/api/v1/appointments/${appointmentId}/status`, { status });
     return response.data;
@@ -201,36 +226,44 @@ export const tenantApi = {
 
 // Customer/Booking API
 export const bookingApi = {
-  getPublicServices: async (tenantId?: string): Promise<PublicService[]> => {
-    const url = tenantId 
-      ? `/api/v1/bookings/public/services?tenant_id=${tenantId}`
-      : '/api/v1/bookings/public/services';
-    const response = await api.get<PublicService[]>(url);
+  // Public endpoints
+  getPublicServices: async (tenantId: string): Promise<PublicService[]> => {
+    const response = await api.get<PublicService[]>(`/api/v1/bookings/public/services?tenant_id=${tenantId}`);
     return response.data;
   },
 
+  // Create booking
   createBooking: async (data: {
     service_id: string;
     start_time: string;
     staff_id?: string;
     notes?: string;
   }): Promise<Booking> => {
-    const response = await api.post<Booking>('/api/v1/bookings/bookings', data);
+    const response = await api.post<Booking>('/api/v1/bookings', data);
     return response.data;
   },
 
+  // Get my bookings
   getMyBookings: async (): Promise<Booking[]> => {
-    const response = await api.get<Booking[]>('/api/v1/bookings/bookings/my');
+    const response = await api.get<Booking[]>('/api/v1/bookings/my');
     return response.data;
   },
 
-  updateBooking: async (bookingId: string, data: { start_time?: string; notes?: string }): Promise<Booking> => {
-    const response = await api.patch<Booking>(`/api/v1/bookings/bookings/${bookingId}`, data);
+  // Get single booking
+  getBooking: async (bookingId: string): Promise<Booking> => {
+    const response = await api.get<Booking>(`/api/v1/bookings/${bookingId}`);
     return response.data;
   },
 
+  // Reschedule booking (PATCH)
+  rescheduleBooking: async (bookingId: string, data: { start_time: string }): Promise<Booking> => {
+    const response = await api.patch<Booking>(`/api/v1/bookings/${bookingId}`, data);
+    return response.data;
+  },
+
+  // Cancel booking (DELETE)
   cancelBooking: async (bookingId: string): Promise<void> => {
-    await api.delete(`/api/v1/bookings/bookings/${bookingId}`);
+    await api.delete(`/api/v1/bookings/${bookingId}`);
   },
 };
 
