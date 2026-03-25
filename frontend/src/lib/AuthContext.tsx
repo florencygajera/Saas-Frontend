@@ -56,13 +56,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const userData = await authApi.me();
       setUser(userData);
-      // Redirect to home based on role
+      // Use window.location for full redirect to ensure route guards work
       const homeRoute = getHomeRoute(userData.role);
       window.location.href = homeRoute;
     } catch (error) {
       console.error('Failed to fetch user after login:', error);
-      // Still redirect to default home if me() fails
-      window.location.href = '/saas/dashboard';
+      // If /auth/me fails, the token might be invalid - redirect to login
+      window.location.href = '/login';
     }
   };
 

@@ -24,12 +24,14 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor to handle 401
+// Response interceptor to handle 401 (exclude auth/login to allow error handling there)
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response?.status === 401) {
-      if (typeof window !== 'undefined') {
+      // Only redirect if it's NOT the login endpoint
+      const isLoginRequest = error.config?.url?.includes('/auth/login');
+      if (!isLoginRequest && typeof window !== 'undefined') {
         localStorage.removeItem('token');
         window.location.href = '/login';
       }
