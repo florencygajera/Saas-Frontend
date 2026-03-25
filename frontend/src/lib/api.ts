@@ -90,8 +90,9 @@ export const saasApi = {
 
 // Tenant Admin API
 export const tenantApi = {
+  // Stats
   getStats: async (): Promise<TenantAdminStats> => {
-    const response = await api.get<TenantAdminStats>('/api/v1/analytics/stats');
+    const response = await api.get<TenantAdminStats>('/api/v1/tenant/stats');
     return response.data;
   },
 
@@ -101,12 +102,23 @@ export const tenantApi = {
     return response.data;
   },
 
-  createService: async (data: Omit<Service, 'id' | 'tenant_id'>): Promise<Service> => {
+  createService: async (data: {
+    name: string;
+    description?: string;
+    price: number;
+    duration_minutes: number;
+  }): Promise<Service> => {
     const response = await api.post<Service>('/api/v1/services', data);
     return response.data;
   },
 
-  updateService: async (serviceId: string, data: Partial<Service>): Promise<Service> => {
+  updateService: async (serviceId: string, data: {
+    name?: string;
+    description?: string;
+    price?: number;
+    duration_minutes?: number;
+    is_active?: boolean;
+  }): Promise<Service> => {
     const response = await api.patch<Service>(`/api/v1/services/${serviceId}`, data);
     return response.data;
   },
@@ -121,12 +133,23 @@ export const tenantApi = {
     return response.data;
   },
 
-  createStaff: async (data: Omit<Staff, 'id' | 'tenant_id'>): Promise<Staff> => {
+  createStaff: async (data: {
+    name: string;
+    email: string;
+    phone?: string;
+    services?: string[];
+  }): Promise<Staff> => {
     const response = await api.post<Staff>('/api/v1/staff', data);
     return response.data;
   },
 
-  updateStaff: async (staffId: string, data: Partial<Staff>): Promise<Staff> => {
+  updateStaff: async (staffId: string, data: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    is_active?: boolean;
+    services?: string[];
+  }): Promise<Staff> => {
     const response = await api.patch<Staff>(`/api/v1/staff/${staffId}`, data);
     return response.data;
   },
@@ -141,12 +164,20 @@ export const tenantApi = {
     return response.data;
   },
 
-  createCustomer: async (data: Omit<Customer, 'id' | 'tenant_id' | 'created_at'>): Promise<Customer> => {
+  createCustomer: async (data: {
+    name: string;
+    email: string;
+    phone?: string;
+  }): Promise<Customer> => {
     const response = await api.post<Customer>('/api/v1/customers', data);
     return response.data;
   },
 
-  updateCustomer: async (customerId: string, data: Partial<Customer>): Promise<Customer> => {
+  updateCustomer: async (customerId: string, data: {
+    name?: string;
+    email?: string;
+    phone?: string;
+  }): Promise<Customer> => {
     const response = await api.patch<Customer>(`/api/v1/customers/${customerId}`, data);
     return response.data;
   },
@@ -154,6 +185,7 @@ export const tenantApi = {
   deleteCustomer: async (customerId: string): Promise<void> => {
     await api.delete(`/api/v1/customers/${customerId}`);
   },
+
 
   // Appointments
   getAppointments: async (): Promise<Appointment[]> => {
