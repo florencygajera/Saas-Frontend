@@ -36,11 +36,13 @@ export default function LoginPage() {
     setError(null);
 
     try {
+      console.log('Attempting login with:', data.email);
       const response = await authApi.login(data.email, data.password);
+      console.log('Login response:', response);
       await login(response.access_token);
     } catch (err: any) {
       console.error('Login error:', err);
-      setError(err.response?.data?.detail || 'Invalid credentials. Please try again.');
+      setError(err.response?.data?.detail || err.message || 'Invalid credentials. Please try again.');
     } finally {
       setLoading(false);
     }
