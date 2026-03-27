@@ -29,7 +29,7 @@ export default function NewBookingPage() {
         return;
       }
       try {
-        const services = await bookingApi.getPublicServices();
+        const services = await bookingApi.getPublicServices("");
         const found = services.find(s => s.id === serviceId);
         setService(found || null);
       } catch (err: any) {
