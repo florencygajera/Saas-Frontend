@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/AuthContext';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -11,23 +11,25 @@ export default function Home() {
   useEffect(() => {
     if (!loading) {
       if (user) {
-        // Redirect based on role
-        if (user.role === 'SUPER_ADMIN') {
-          router.push('/saas/dashboard');
-        } else if (user.role === 'TENANT_ADMIN') {
-          router.push('/app/dashboard');
+        if (user.role === "SUPER_ADMIN") {
+          router.push("/saas/dashboard");
+        } else if (user.role === "TENANT_ADMIN") {
+          router.push("/app/dashboard");
         } else {
-          router.push('/book/home');
+          router.push("/book/home");
         }
       } else {
-        router.push('/login');
+        router.push("/login");
       }
     }
   }, [user, loading, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+    <div className="flex h-screen items-center justify-center bg-background">
+      <div className="flex flex-col items-center gap-4">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      </div>
     </div>
   );
 }

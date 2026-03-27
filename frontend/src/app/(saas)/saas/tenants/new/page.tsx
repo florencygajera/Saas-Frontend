@@ -1,22 +1,36 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useRouter } from 'next/navigation';
-import { Topbar } from '@/components/Topbar';
-import { saasApi } from '@/lib/api';
-import { Tenant } from '@/lib/types';
-import { ArrowLeft, CheckCircle } from 'lucide-react';
-import Link from 'next/link';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useRouter } from "next/navigation";
+import { saasApi } from "@/lib/api";
+import { Tenant } from "@/lib/types";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ArrowLeft, CheckCircle } from "lucide-react";
+import Link from "next/link";
+import { toast } from "sonner";
 
 const tenantSchema = z.object({
-  name: z.string().min(1, 'Tenant name is required'),
-  slug: z.string().min(1, 'Slug is required').regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
-  plan: z.string().min(1, 'Plan is required'),
-  admin_email: z.string().email('Valid email is required'),
-  admin_password: z.string().min(6, 'Password must be at least 6 characters'),
+  name: z.string().min(1, "Tenant name is required"),
+  slug: z
+    .string()
+    .min(1, "Slug is required")
+    .regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with hyphens"),
+  plan: z.string().min(1, "Plan is required"),
+  admin_email: z.string().email("Valid email is required"),
+  admin_password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 type TenantFormData = z.infer<typeof tenantSchema>;
@@ -29,13 +43,12 @@ interface ProvisionResult {
 
 export default function NewTenantPage() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ProvisionResult | null>(null);
-  const router = useRouter();
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<TenantFormData>({
     resolver: zodResolver(tenantSchema),
@@ -43,18 +56,12 @@ export default function NewTenantPage() {
 
   const onSubmit = async (data: TenantFormData) => {
     setLoading(true);
-    setError(null);
-    setResult(null);
-
     try {
       const tenant = await saasApi.createTenant(data);
-      setResult({
-        tenant,
-        admin_email: data.admin_email,
-        admin_password: data.admin_password,
-      });
+      setResult({ tenant, admin_email: data.admin_email, admin_password: data.admin_password });
+      toast.success("Tenant provisioned successfully!");
     } catch (err: any) {
-      setError(err.response?.data?.detail || err.message || 'Failed to create tenant');
+      toast.error(err.response?.data?.detail || err.message || "Failed to create tenant");
     } finally {
       setLoading(false);
     }
@@ -62,152 +69,108 @@ export default function NewTenantPage() {
 
   if (result) {
     return (
-      <div>
-        <Topbar title="Tenant Provisioned" />
-        <div className="p-6">
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-center mb-6">
-                <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                <h2 className="text-2xl font-bold text-gray-900">Tenant Provisioned Successfully!</h2>
-              </div>
-
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                <p className="text-sm text-green-800 font-medium mb-2">
-                  ⚠️ Save these credentials - they will not be shown again!
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Tenant ID</label>
-                  <p className="mt-1 text-lg font-mono bg-gray-100 p-2 rounded">{result.tenant.id}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Tenant Name</label>
-                  <p className="mt-1 text-lg">{result.tenant.name}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Admin Email</label>
-                  <p className="mt-1 text-lg">{result.admin_email}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Admin Password</label>
-                  <p className="mt-1 text-lg font-mono bg-gray-100 p-2 rounded">{result.admin_password}</p>
+      <div className="p-6">
+        <div className="max-w-2xl mx-auto">
+          <Card>
+            <CardContent className="pt-6 text-center space-y-6">
+              <div className="flex justify-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+                  <CheckCircle className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
                 </div>
               </div>
-
-              <div className="mt-6 flex gap-4">
-                <Link
-                  href="/saas/tenants"
-                  className="flex-1 text-center py-2 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
-                >
-                  Back to Tenants
-                </Link>
-                <Link
-                  href={`/saas/tenants/${result.tenant.id}`}
-                  className="flex-1 text-center py-2 px-4 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-                >
-                  View Tenant Stats
-                </Link>
+              <div>
+                <h2 className="text-2xl font-bold">Tenant Provisioned!</h2>
+                <p className="text-muted-foreground mt-1">Save these credentials - they will not be shown again.</p>
               </div>
-            </div>
-          </div>
+              <div className="rounded-2xl bg-muted/50 p-6 text-left space-y-3">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase">Tenant ID</p>
+                  <p className="font-mono text-sm">{result.tenant.id}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase">Tenant Name</p>
+                  <p className="text-sm">{result.tenant.name}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase">Admin Email</p>
+                  <p className="text-sm">{result.admin_email}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase">Admin Password</p>
+                  <p className="font-mono text-sm">{result.admin_password}</p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <Button variant="outline" className="flex-1" asChild>
+                  <Link href="/saas/tenants">Back to Tenants</Link>
+                </Button>
+                <Button className="flex-1" asChild>
+                  <Link href={`/saas/tenants/${result.tenant.id}`}>View Stats</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <Topbar title="Create New Tenant" />
-      <div className="p-6">
-        <div className="max-w-2xl mx-auto">
-          <Link
-            href="/saas/tenants"
-            className="flex items-center text-gray-600 hover:text-gray-900 mb-6"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Tenants
-          </Link>
+    <div className="p-6">
+      <div className="max-w-2xl mx-auto space-y-6">
+        <Link href="/saas/tenants" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Tenants
+        </Link>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-6">Provision New Tenant</h2>
-
-            {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-                {error}
+        <Card>
+          <CardHeader>
+            <CardTitle>Provision New Tenant</CardTitle>
+            <CardDescription>Create a new tenant with an admin account</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <div className="space-y-2">
+                <Label>Tenant Name</Label>
+                <Input {...register("name")} placeholder="My Business" />
+                {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
               </div>
-            )}
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Tenant Name</label>
-                <input
-                  {...register('name')}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2 px-3 border"
-                  placeholder="My Business"
-                />
-                {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
+              <div className="space-y-2">
+                <Label>Slug</Label>
+                <Input {...register("slug")} placeholder="my-business" />
+                {errors.slug && <p className="text-sm text-destructive">{errors.slug.message}</p>}
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Slug</label>
-                <input
-                  {...register('slug')}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2 px-3 border"
-                  placeholder="my-business"
-                />
-                {errors.slug && <p className="mt-1 text-sm text-red-600">{errors.slug.message}</p>}
+              <div className="space-y-2">
+                <Label>Plan</Label>
+                <Select onValueChange={(val) => setValue("plan", val)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a plan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="free">Free</SelectItem>
+                    <SelectItem value="basic">Basic</SelectItem>
+                    <SelectItem value="pro">Pro</SelectItem>
+                    <SelectItem value="enterprise">Enterprise</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.plan && <p className="text-sm text-destructive">{errors.plan.message}</p>}
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Plan</label>
-                <select
-                  {...register('plan')}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2 px-3 border"
-                >
-                  <option value="">Select a plan</option>
-                  <option value="free">Free</option>
-                  <option value="basic">Basic</option>
-                  <option value="pro">Pro</option>
-                  <option value="enterprise">Enterprise</option>
-                </select>
-                {errors.plan && <p className="mt-1 text-sm text-red-600">{errors.plan.message}</p>}
+              <div className="space-y-2">
+                <Label>Admin Email</Label>
+                <Input {...register("admin_email")} type="email" placeholder="admin@business.com" />
+                {errors.admin_email && <p className="text-sm text-destructive">{errors.admin_email.message}</p>}
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Admin Email</label>
-                <input
-                  {...register('admin_email')}
-                  type="email"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2 px-3 border"
-                  placeholder="admin@business.com"
-                />
-                {errors.admin_email && <p className="mt-1 text-sm text-red-600">{errors.admin_email.message}</p>}
+              <div className="space-y-2">
+                <Label>Admin Password</Label>
+                <Input {...register("admin_password")} type="password" placeholder="••••••••" />
+                {errors.admin_password && <p className="text-sm text-destructive">{errors.admin_password.message}</p>}
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Admin Password</label>
-                <input
-                  {...register('admin_password')}
-                  type="password"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2 px-3 border"
-                  placeholder="••••••••"
-                />
-                {errors.admin_password && <p className="mt-1 text-sm text-red-600">{errors.admin_password.message}</p>}
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-2 px-4 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Provisioning...' : 'Provision Tenant'}
-              </button>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Provisioning..." : "Provision Tenant"}
+              </Button>
             </form>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
