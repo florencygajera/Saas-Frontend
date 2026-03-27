@@ -1,9 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/AuthContext';
-import { Sidebar } from '@/components/Sidebar';
+import { useEffect, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/AuthContext";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { Topbar } from "@/components/layout/Topbar";
+import { CommandPalette } from "@/components/CommandPalette";
 
 export default function TenantLayout({
   children,
@@ -12,35 +14,48 @@ export default function TenantLayout({
 }) {
   const { user, role, loading } = useAuth();
   const router = useRouter();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        router.push('/login');
-      } else if (role !== 'TENANT_ADMIN') {
-        if (role === 'SUPER_ADMIN') {
-          router.push('/saas/dashboard');
+        router.push("/login");
+      } else if (role !== "TENANT_ADMIN") {
+        if (role === "SUPER_ADMIN") {
+          router.push("/saas/dashboard");
         } else {
-          router.push('/book/home');
+          router.push("/book/home");
         }
       }
     }
   }, [user, role, loading, router]);
 
-  if (loading || !user || role !== 'TENANT_ADMIN') {
+  if (loading || !user || role !== "TENANT_ADMIN") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar role="TENANT_ADMIN" />
-      <main className="flex-1 bg-gray-50">
-        {children}
-      </main>
+    <div className="flex h-screen overflow-hidden bg-background">
+      <Sidebar
+        role="TENANT_ADMIN"
+        collapsed={sidebarCollapsed}
+        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+      />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Topbar onSearchOpen={() => {}} />
+        <main className="flex-1 overflow-y-auto">
+          {children}
+        </main>
+      </div>
+      <CommandPalette />
     </div>
   );
 }
