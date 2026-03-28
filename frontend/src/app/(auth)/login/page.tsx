@@ -165,9 +165,9 @@ export default function LoginPage() {
 
           <div className="rounded-2xl bg-muted/50 p-4 text-xs text-muted-foreground">
             <p className="font-medium text-foreground mb-2">Demo credentials:</p>
-            <p>Super Admin: admin@saas.com / admin123</p>
-            <p>Tenant Admin: tenant@business.com / tenant123</p>
-            <p>Customer: user@example.com / user123</p>
+            <p>Super Admin: super@demo.com / Admin@123</p>
+            <p>Tenant Admin: tenant1@demo.com / Admin@123</p>
+            <p>Customer: customer1@demo.com / Admin@123</p>
           </div>
         </div>
       </div>
