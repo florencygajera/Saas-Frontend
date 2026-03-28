@@ -6,12 +6,14 @@ import { Topbar } from '@/components/Topbar';
 import { Loading } from '@/components/Loading';
 import { bookingApi } from '@/lib/api';
 import { PublicService } from '@/lib/types';
+import { useAuth } from '@/lib/AuthContext';
 import { ArrowLeft, Calendar, Clock, DollarSign } from 'lucide-react';
 import Link from 'next/link';
 
 export default function NewBookingPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { user } = useAuth();
   const serviceId = searchParams.get('serviceId');
   
   const [service, setService] = useState<PublicService | null>(null);
@@ -24,12 +26,12 @@ export default function NewBookingPage() {
 
   useEffect(() => {
     const fetchService = async () => {
-      if (!serviceId) {
+      if (!serviceId || !user?.tenant_id) {
         setLoading(false);
         return;
       }
       try {
-        const services = await bookingApi.getPublicServices("");
+        const services = await bookingApi.getPublicServices(user.tenant_id);
         const found = services.find(s => s.id === serviceId);
         setService(found || null);
       } catch (err: any) {
@@ -39,7 +41,7 @@ export default function NewBookingPage() {
       }
     };
     fetchService();
-  }, [serviceId]);
+  }, [serviceId, user?.tenant_id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

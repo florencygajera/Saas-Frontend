@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { bookingApi } from "@/lib/api";
 import { PublicService } from "@/lib/types";
+import { useAuth } from "@/lib/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,24 +13,26 @@ import Link from "next/link";
 import { toast } from "sonner";
 
 export default function CustomerHome() {
+  const { user } = useAuth();
   const [services, setServices] = useState<PublicService[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchServices = async () => {
+  const fetchServices = useCallback(async () => {
+    if (!user?.tenant_id) return;
     try {
       setLoading(true);
-      const data = await bookingApi.getPublicServices("");
+      const data = await bookingApi.getPublicServices(user.tenant_id);
       setServices(data);
     } catch (err: any) {
       toast.error(err.message || "Failed to load services");
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.tenant_id]);
 
   useEffect(() => {
     fetchServices();
-  }, []);
+  }, [fetchServices]);
 
   if (loading) {
     return (
