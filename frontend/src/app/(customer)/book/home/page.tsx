@@ -18,10 +18,9 @@ export default function CustomerHome() {
   const [loading, setLoading] = useState(true);
 
   const fetchServices = useCallback(async () => {
-    if (!user?.tenant_id) return;
     try {
       setLoading(true);
-      const data = await bookingApi.getPublicServices(user.tenant_id);
+      const data = await bookingApi.getPublicServices(user?.tenant_id);
       setServices(data);
     } catch (err: any) {
       toast.error(err.message || "Failed to load services");

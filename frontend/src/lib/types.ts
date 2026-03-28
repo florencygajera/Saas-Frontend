@@ -7,6 +7,7 @@ export interface User {
   email: string;
   role: UserRole;
   tenant_id?: string;
+  tenant_name?: string;
   name?: string;
 }
 
@@ -37,9 +38,17 @@ export interface PlatformStats {
 export interface Tenant {
   id: string;
   name: string;
+  slug?: string;
   plan: string;
   is_active: boolean;
   created_at: string;
+}
+
+export interface TenantProvisionResult {
+  tenant_id?: string;
+  admin_email?: string;
+  temp_password?: string;
+  tenant?: Tenant;
 }
 
 // Top service item (Tenant stats)

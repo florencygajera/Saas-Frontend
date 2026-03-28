@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { saasApi } from "@/lib/api";
-import { Tenant } from "@/lib/types";
+import { Tenant, TenantProvisionResult } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,8 +57,19 @@ export default function NewTenantPage() {
   const onSubmit = async (data: TenantFormData) => {
     setLoading(true);
     try {
-      const tenant = await saasApi.createTenant(data);
-      setResult({ tenant, admin_email: data.admin_email, admin_password: data.admin_password });
+      const provision: TenantProvisionResult = await saasApi.createTenant(data);
+      const tenant = provision.tenant || {
+        id: provision.tenant_id || "unknown",
+        name: data.name,
+        plan: data.plan,
+        is_active: true,
+        created_at: new Date().toISOString(),
+      };
+      setResult({
+        tenant,
+        admin_email: provision.admin_email || data.admin_email,
+        admin_password: provision.temp_password || data.admin_password,
+      });
       toast.success("Tenant provisioned successfully!");
     } catch (err: any) {
       toast.error(err.response?.data?.detail || err.message || "Failed to create tenant");

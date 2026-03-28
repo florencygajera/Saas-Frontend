@@ -248,6 +248,9 @@ export const Topbar: React.FC<TopbarProps> = ({ title, onMenuClick, onSearchOpen
           <DropdownMenuLabel>
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium">{user?.email}</p>
+              {user?.role === "TENANT_ADMIN" && user?.tenant_name && (
+                <p className="text-xs text-muted-foreground">{user.tenant_name}</p>
+              )}
               <p className="text-xs text-muted-foreground capitalize">
                 {user?.role?.replace("_", " ").toLowerCase()}
               </p>

@@ -226,6 +226,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, collapsed = false, onTog
           {!collapsed && (
             <div className="flex-1 overflow-hidden">
               <p className="truncate text-sm font-medium">{user?.email}</p>
+              {role === "TENANT_ADMIN" && user?.tenant_name && (
+                <p className="truncate text-xs text-muted-foreground">{user.tenant_name}</p>
+              )}
               <p className="truncate text-xs text-muted-foreground capitalize">
                 {role.replace("_", " ").toLowerCase()}
               </p>

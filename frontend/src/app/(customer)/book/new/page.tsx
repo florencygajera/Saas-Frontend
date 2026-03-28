@@ -1,45 +1,50 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { Topbar } from '@/components/Topbar';
-import { Loading } from '@/components/Loading';
-import { bookingApi } from '@/lib/api';
-import { PublicService } from '@/lib/types';
-import { useAuth } from '@/lib/AuthContext';
-import { ArrowLeft, Calendar, Clock, DollarSign } from 'lucide-react';
-import Link from 'next/link';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { bookingApi } from "@/lib/api";
+import { PublicService } from "@/lib/types";
+import { useAuth } from "@/lib/AuthContext";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowLeft, Clock, DollarSign } from "lucide-react";
+import { toast } from "sonner";
 
 export default function NewBookingPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user } = useAuth();
-  const serviceId = searchParams.get('serviceId');
-  
+  const serviceId = searchParams.get("serviceId");
+
   const [service, setService] = useState<PublicService | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [dateTime, setDateTime] = useState('');
-  const [notes, setNotes] = useState('');
+  const [dateTime, setDateTime] = useState("");
+  const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchService = async () => {
-      if (!serviceId || !user?.tenant_id) {
+      if (!serviceId) {
         setLoading(false);
         return;
       }
       try {
-        const services = await bookingApi.getPublicServices(user.tenant_id);
-        const found = services.find(s => s.id === serviceId);
-        setService(found || null);
+        setLoading(true);
+        const services = await bookingApi.getPublicServices(user?.tenant_id);
+        setService(services.find((s) => s.id === serviceId) || null);
       } catch (err: any) {
-        setError(err.message || 'Failed to load service');
+        setError(err.response?.data?.detail || err.message || "Failed to load service");
       } finally {
         setLoading(false);
       }
     };
+
     fetchService();
   }, [serviceId, user?.tenant_id]);
 
@@ -47,115 +52,98 @@ export default function NewBookingPage() {
     e.preventDefault();
     if (!service || !dateTime) return;
 
-    setSubmitting(true);
-    setError(null);
-
     try {
+      setSubmitting(true);
+      setError(null);
       await bookingApi.createBooking({
         service_id: service.id,
         start_at: new Date(dateTime).toISOString(),
-        notes,
+        notes: notes.trim() || undefined,
       });
-      setSuccess('Booking created successfully!');
-      setTimeout(() => {
-        router.push('/book/my-bookings');
-      }, 2000);
+      toast.success("Booking created successfully.");
+      router.push("/book/my-bookings");
     } catch (err: any) {
-      setError(err.response?.data?.detail || err.message || 'Failed to create booking');
+      setError(err.response?.data?.detail || err.message || "Failed to create booking");
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) return <Loading message="Loading service..." />;
+  if (loading) {
+    return (
+      <div className="space-y-6 p-6">
+        <Skeleton className="h-6 w-[200px]" />
+        <Skeleton className="h-[360px] rounded-2xl" />
+      </div>
+    );
+  }
 
   if (!service) {
     return (
-      <div>
-        <Topbar title="Book Service" />
-        <div className="p-6">
-          <Link href="/book/home" className="flex items-center text-gray-600 hover:text-gray-900 mb-6">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Services
-          </Link>
-          <div className="text-center py-12">
-            <p className="text-gray-500">Service not found.</p>
-          </div>
-        </div>
+      <div className="space-y-6 p-6">
+        <Link href="/book/home" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" />
+          Back to services
+        </Link>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">Service not found.</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div>
-      <Topbar title="Book Service" />
-      <div className="p-6">
-        <Link href="/book/home" className="flex items-center text-gray-600 hover:text-gray-900 mb-6">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Services
-        </Link>
+    <div className="space-y-6 p-6">
+      <Link href="/book/home" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+        <ArrowLeft className="h-4 w-4" />
+        Back to services
+      </Link>
 
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">{service.name}</h2>
-            
-            <div className="flex items-center space-x-4 text-sm text-gray-500 mb-6">
-              <div className="flex items-center">
-                <Clock className="w-4 h-4 mr-1" />
-                {service.duration_min} min
-              </div>
-              <div className="flex items-center">
-                <DollarSign className="w-4 h-4 mr-1" />
-                ${service.price}
-              </div>
-            </div>
-
-            {success && (
-              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
-                {success}
-              </div>
-            )}
-
-            {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Date & Time</label>
-                <input
-                  type="datetime-local"
-                  value={dateTime}
-                  onChange={(e) => setDateTime(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Notes (optional)</label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3"
-                  rows={3}
-                  placeholder="Any special requests or notes..."
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full py-2 px-4 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submitting ? 'Creating Booking...' : 'Confirm Booking'}
-              </button>
-            </form>
+      <Card className="max-w-2xl">
+        <CardHeader>
+          <CardTitle>{service.name}</CardTitle>
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5" />
+              {service.duration_min} min
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <DollarSign className="h-3.5 w-3.5" />
+              ${service.price}
+            </span>
           </div>
-        </div>
-      </div>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="datetime">Date & time</Label>
+              <Input
+                id="datetime"
+                type="datetime-local"
+                value={dateTime}
+                onChange={(e) => setDateTime(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notes (optional)</Label>
+              <Textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Any extra details for this booking"
+                rows={4}
+              />
+            </div>
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <Button type="submit" className="w-full" disabled={submitting}>
+              {submitting ? "Creating booking..." : "Confirm booking"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

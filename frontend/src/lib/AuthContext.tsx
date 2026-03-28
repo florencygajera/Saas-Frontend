@@ -3,13 +3,13 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, UserRole } from './types';
 import { authApi } from './api';
-import { getToken, setToken as setAuthToken, removeToken, getHomeRoute, redirectToHome } from './auth';
+import { getToken, setToken as setAuthToken, removeToken, setRole as setAuthRole, removeRole, getHomeRoute, redirectToHome } from './auth';
 
 interface AuthContextType {
   user: User | null;
   role: UserRole | null;
   loading: boolean;
-  login: (token: string, userData?: User) => Promise<void>;
+  login: (token: string) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -40,9 +40,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           const userData = await authApi.me();
           setUser(userData);
+          setAuthRole(userData.role);
         } catch (error) {
           console.error('Failed to fetch user:', error);
           removeToken();
+          removeRole();
         }
       }
       setLoading(false);
@@ -51,21 +53,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initAuth();
   }, []);
 
-  const login = async (token: string, userData?: User) => {
+  const login = async (token: string) => {
     setAuthToken(token);
     try {
-      const user = userData || await authApi.me();
+      // Always validate role and tenant context from /auth/me after login.
+      const user = await authApi.me();
       setUser(user);
+      setAuthRole(user.role);
       const homeRoute = getHomeRoute(user.role);
       window.location.href = homeRoute;
     } catch (error) {
       console.error('Failed to fetch user after login:', error);
+      removeToken();
+      removeRole();
       window.location.href = '/login';
     }
   };
 
   const logout = () => {
     removeToken();
+    removeRole();
     setUser(null);
     window.location.href = '/login';
   };
@@ -75,6 +82,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const userData = await authApi.me();
         setUser(userData);
+        setAuthRole(userData.role);
       } catch (error) {
         console.error('Failed to refresh user:', error);
         logout();

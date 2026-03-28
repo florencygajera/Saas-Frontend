@@ -1,19 +1,43 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Topbar } from '@/components/Topbar';
-import { DataTable } from '@/components/DataTable';
-import { Loading } from '@/components/Loading';
-import { ErrorState } from '@/components/ErrorState';
-import { bookingApi } from '@/lib/api';
-import { Booking } from '@/lib/types';
-import Link from 'next/link';
-import { X } from 'lucide-react';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { bookingApi } from "@/lib/api";
+import { Booking } from "@/lib/types";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Calendar, Pencil, XCircle, CreditCard } from "lucide-react";
+import { toast } from "sonner";
+
+const CANCELLABLE = new Set(["pending", "confirmed"]);
 
 export default function MyBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [rescheduleTarget, setRescheduleTarget] = useState<Booking | null>(null);
+  const [newStartAt, setNewStartAt] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const fetchBookings = async () => {
     try {
@@ -22,7 +46,7 @@ export default function MyBookingsPage() {
       const data = await bookingApi.getMyBookings();
       setBookings(data);
     } catch (err: any) {
-      setError(err.message || 'Failed to load bookings');
+      setError(err.response?.data?.detail || err.message || "Failed to load bookings");
     } finally {
       setLoading(false);
     }
@@ -32,97 +56,154 @@ export default function MyBookingsPage() {
     fetchBookings();
   }, []);
 
-  const handleCancel = async (id: string) => {
-    if (!confirm('Are you sure you want to cancel this booking?')) return;
+  const cancelBooking = async (id: string) => {
     try {
       await bookingApi.cancelBooking(id);
+      toast.success("Booking cancelled.");
       fetchBookings();
     } catch (err: any) {
-      alert(err.message || 'Failed to cancel booking');
+      toast.error(err.response?.data?.detail || err.message || "Failed to cancel booking");
     }
   };
 
-  if (loading) return <Loading message="Loading bookings..." />;
-  if (error) return <ErrorState message={error} onRetry={fetchBookings} />;
+  const openReschedule = (booking: Booking) => {
+    setRescheduleTarget(booking);
+    setNewStartAt(new Date(booking.start_at).toISOString().slice(0, 16));
+  };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'confirmed':
-        return 'bg-blue-100 text-blue-800';
-      case 'in_progress':
-        return 'bg-purple-100 text-purple-800';
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+  const submitReschedule = async () => {
+    if (!rescheduleTarget || !newStartAt) return;
+    try {
+      setSaving(true);
+      await bookingApi.rescheduleBooking(rescheduleTarget.id, {
+        start_at: new Date(newStartAt).toISOString(),
+      });
+      toast.success("Booking rescheduled.");
+      setRescheduleTarget(null);
+      fetchBookings();
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || err.message || "Failed to reschedule booking");
+    } finally {
+      setSaving(false);
     }
   };
 
-  const canCancel = (status: string) => {
-    return status === 'pending' || status === 'confirmed';
-  };
+  if (loading) {
+    return (
+      <div className="space-y-6 p-6">
+        <Skeleton className="h-8 w-[200px]" />
+        <Skeleton className="h-[420px] rounded-2xl" />
+      </div>
+    );
+  }
 
-  const columns = [
-    {
-      key: 'start_at',
-      header: 'Date/Time',
-      render: (b: Booking) => new Date(b.start_at).toLocaleString(),
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      render: (b: Booking) => (
-        <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(b.status)}`}>
-          {b.status.replace('_', ' ').toUpperCase()}
-        </span>
-      ),
-    },
-    {
-      key: 'actions',
-      header: 'Actions',
-      render: (b: Booking) => (
-        <div className="flex space-x-2">
-          {canCancel(b.status) && (
-            <button
-              onClick={() => handleCancel(b.id)}
-              className="flex items-center px-2 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700"
-            >
-              <X className="w-3 h-3 mr-1" />
-              Cancel
-            </button>
-          )}
-        </div>
-      ),
-    },
-  ];
+  if (error) {
+    return (
+      <div className="space-y-6 p-6">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="mb-4 text-sm text-destructive">{error}</p>
+            <Button onClick={fetchBookings}>Retry</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <Topbar title="My Bookings" />
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">My Bookings</h1>
-          <Link
-            href="/book/home"
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-          >
-            Book New
-          </Link>
+    <div className="space-y-6 p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">My Bookings</h1>
+          <p className="text-muted-foreground">Only your own bookings are shown here.</p>
         </div>
-
-        <div className="bg-white rounded-lg shadow">
-          <DataTable
-            data={bookings}
-            columns={columns}
-            keyField="id"
-            emptyMessage="No bookings found. Book a service to get started!"
-          />
-        </div>
+        <Button asChild>
+          <Link href="/book/home">Book New Service</Link>
+        </Button>
       </div>
+
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date/Time</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {bookings.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3} className="h-24 text-center">
+                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                      <Calendar className="h-8 w-8" />
+                      <p>No bookings yet.</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                bookings.map((booking) => (
+                  <TableRow key={booking.id}>
+                    <TableCell>{new Date(booking.start_at).toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{booking.status.replace("_", " ")}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-2">
+                        {CANCELLABLE.has(booking.status) && (
+                          <>
+                            <Button size="sm" variant="outline" onClick={() => openReschedule(booking)}>
+                              <Pencil className="mr-1 h-3.5 w-3.5" />
+                              Edit
+                            </Button>
+                            <Button size="sm" variant="destructive" onClick={() => cancelBooking(booking.id)}>
+                              <XCircle className="mr-1 h-3.5 w-3.5" />
+                              Cancel
+                            </Button>
+                            <Button size="sm" asChild>
+                              <Link href={`/pay/${booking.id}`}>
+                                <CreditCard className="mr-1 h-3.5 w-3.5" />
+                                Pay
+                              </Link>
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Dialog open={!!rescheduleTarget} onOpenChange={() => setRescheduleTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reschedule Booking</DialogTitle>
+            <DialogDescription>Choose a new date and time for your booking.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="newStartAt">New date & time</Label>
+            <Input
+              id="newStartAt"
+              type="datetime-local"
+              value={newStartAt}
+              onChange={(e) => setNewStartAt(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRescheduleTarget(null)}>
+              Cancel
+            </Button>
+            <Button onClick={submitReschedule} disabled={saving || !newStartAt}>
+              {saving ? "Saving..." : "Save changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
