@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { KpiCard } from "@/components/widgets/kpi-card";
-import { ArrowLeft, Calendar, DollarSign, RefreshCw, XCircle, TrendingUp } from "lucide-react";
+import { ArrowLeft, Calendar, DollarSign, RefreshCw, XCircle, TrendingUp, Users, Scissors } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 

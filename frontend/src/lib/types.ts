@@ -53,10 +53,15 @@ export interface TopServiceItem {
 // Tenant stats
 export interface TenantStats {
   revenue: number;
+  total_revenue?: number;
   total_bookings: number;
+  total_customers?: number;
+  active_services?: number;
+  active_staff?: number;
   completed_count: number;
   cancelled_count: number;
   top_services: TopServiceItem[];
+  bookings_by_status?: any[];
   heatmap_7x24: number[][];
 }
 
