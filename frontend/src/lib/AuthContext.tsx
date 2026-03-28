@@ -9,7 +9,7 @@ interface AuthContextType {
   user: User | null;
   role: UserRole | null;
   loading: boolean;
-  login: (token: string) => Promise<void>;
+  login: (token: string, userData?: User) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -51,17 +51,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initAuth();
   }, []);
 
-  const login = async (token: string) => {
+  const login = async (token: string, userData?: User) => {
     setAuthToken(token);
     try {
-      const userData = await authApi.me();
-      setUser(userData);
-      // Use window.location for full redirect to ensure route guards work
-      const homeRoute = getHomeRoute(userData.role);
+      const user = userData || await authApi.me();
+      setUser(user);
+      const homeRoute = getHomeRoute(user.role);
       window.location.href = homeRoute;
     } catch (error) {
       console.error('Failed to fetch user after login:', error);
-      // If /auth/me fails, the token might be invalid - redirect to login
       window.location.href = '/login';
     }
   };

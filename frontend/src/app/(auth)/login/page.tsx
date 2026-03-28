@@ -40,7 +40,7 @@ export default function LoginPage() {
     setError(null);
     try {
       const response = await authApi.login(data.email, data.password);
-      await login(response.access_token);
+      await login(response.access_token, response.user);
     } catch (err: any) {
       setError(err.response?.data?.detail || err.message || "Invalid credentials. Please try again.");
     } finally {
