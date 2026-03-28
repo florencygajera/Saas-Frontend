@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { saasApi } from "@/lib/api";
 import { TenantStats } from "@/lib/types";
@@ -19,7 +19,7 @@ export default function TenantStatsPage() {
   const [stats, setStats] = useState<TenantStats | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       setLoading(true);
       const data = await saasApi.getTenantStats(tenantId);
@@ -29,11 +29,11 @@ export default function TenantStatsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tenantId]);
 
   useEffect(() => {
     fetchStats();
-  }, [tenantId]);
+  }, [fetchStats]);
 
   if (loading) {
     return (
