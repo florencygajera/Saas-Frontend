@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { bookingApi, paymentApi } from "@/lib/api";
 import { Booking, PaymentVerifyResponse } from "@/lib/types";
+import { useAuth } from "@/lib/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,8 @@ type PaymentStep = "summary" | "processing" | "otp" | "success" | "error";
 
 export default function PaymentPage() {
   const params = useParams();
+  const router = useRouter();
+  const { user, role, loading: authLoading } = useAuth();
   const appointmentId = params.appointmentId as string;
 
   const [booking, setBooking] = useState<Booking | null>(null);
@@ -29,7 +32,20 @@ export default function PaymentPage() {
   const [receipt, setReceipt] = useState<PaymentVerifyResponse | null>(null);
 
   useEffect(() => {
+    if (!authLoading) {
+      if (!user) {
+        router.push("/login");
+        return;
+      }
+      if (role !== "CUSTOMER") {
+        router.push(role === "SUPER_ADMIN" ? "/saas/dashboard" : "/app/dashboard");
+      }
+    }
+  }, [authLoading, user, role, router]);
+
+  useEffect(() => {
     const fetchBooking = async () => {
+      if (!user || role !== "CUSTOMER") return;
       try {
         const bookings = await bookingApi.getMyBookings();
         const found = bookings.find((b) => b.id === appointmentId);
@@ -45,7 +61,7 @@ export default function PaymentPage() {
       }
     };
     fetchBooking();
-  }, [appointmentId]);
+  }, [appointmentId, user, role]);
 
   const startPayment = async () => {
     try {
@@ -81,7 +97,7 @@ export default function PaymentPage() {
     }
   };
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="space-y-6 p-6">
         <Skeleton className="h-6 w-[220px]" />

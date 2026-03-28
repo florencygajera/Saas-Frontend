@@ -23,10 +23,10 @@ export function middleware(request: NextRequest) {
   const requiredRole = getRequiredRole(pathname);
 
   if (requiredRole) {
-    if (!token || !role) {
+    if (!token) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
-    if (role !== requiredRole) {
+    if (role && role !== requiredRole) {
       return NextResponse.redirect(new URL(HOME_BY_ROLE[role], request.url));
     }
   }

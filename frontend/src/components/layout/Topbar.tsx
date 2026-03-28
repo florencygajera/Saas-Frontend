@@ -55,32 +55,7 @@ interface Notification {
   read: boolean;
 }
 
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    title: "New booking received",
-    description: "John Doe booked a Haircut service",
-    time: "2 min ago",
-    type: "success",
-    read: false,
-  },
-  {
-    id: "2",
-    title: "Payment confirmed",
-    description: "Payment of $45.00 was processed",
-    time: "15 min ago",
-    type: "info",
-    read: false,
-  },
-  {
-    id: "3",
-    title: "Appointment reminder",
-    description: "You have 3 appointments today",
-    time: "1 hour ago",
-    type: "warning",
-    read: true,
-  },
-];
+const mockNotifications: Notification[] = [];
 
 export const Topbar: React.FC<TopbarProps> = ({ title, onMenuClick, onSearchOpen }) => {
   const { theme, setTheme } = useTheme();
