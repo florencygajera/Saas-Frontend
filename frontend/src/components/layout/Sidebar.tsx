@@ -123,7 +123,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, collapsed = false, onTog
     role === "SUPER_ADMIN"
       ? "SaaS Admin"
       : role === "TENANT_ADMIN"
-        ? user?.tenant_name || "Business Portal"
+        ? "Business Portal"
         : "Booking";
 
   const brandInitial = brandName.charAt(0).toUpperCase();

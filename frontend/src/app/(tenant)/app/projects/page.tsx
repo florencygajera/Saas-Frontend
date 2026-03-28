@@ -18,7 +18,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Plus,
   Search,
@@ -53,9 +52,8 @@ export default function ProjectsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<Service | null>(null);
   const [formData, setFormData] = useState({
     name: "",
-    description: "",
     price: 0,
-    duration_minutes: 30,
+    duration_min: 30,
     is_active: true,
   });
   const [submitting, setSubmitting] = useState(false);
@@ -78,8 +76,7 @@ export default function ProjectsPage() {
 
   const filteredServices = services.filter(
     (s) =>
-      s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (s.description && s.description.toLowerCase().includes(searchTerm.toLowerCase()))
+      s.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const projects: ProjectCard[] = filteredServices.map((service) => ({
@@ -101,7 +98,7 @@ export default function ProjectsPage() {
       }
       setShowModal(false);
       setEditingService(null);
-      setFormData({ name: "", description: "", price: 0, duration_minutes: 30, is_active: true });
+            setFormData({ name: "", price: 0, duration_min: 30, is_active: true });
       fetchServices();
     } catch (err: any) {
       toast.error(err.message || "Failed to save service");
@@ -114,9 +111,8 @@ export default function ProjectsPage() {
     setEditingService(s);
     setFormData({
       name: s.name,
-      description: s.description || "",
       price: s.price,
-      duration_minutes: s.duration_minutes,
+      duration_min: s.duration_min,
       is_active: s.is_active,
     });
     setShowModal(true);
@@ -161,7 +157,7 @@ export default function ProjectsPage() {
         <Button
           onClick={() => {
             setEditingService(null);
-            setFormData({ name: "", description: "", price: 0, duration_minutes: 30, is_active: true });
+      setFormData({ name: "", price: 0, duration_min: 30, is_active: true });
             setShowModal(true);
           }}
         >
@@ -211,7 +207,7 @@ export default function ProjectsPage() {
                   <div className="space-y-1">
                     <CardTitle className="text-base font-semibold">{service.name}</CardTitle>
                     <CardDescription className="line-clamp-2">
-                      {service.description || "No description"}
+                      {service.name}
                     </CardDescription>
                   </div>
                   <DropdownMenu>
@@ -248,7 +244,7 @@ export default function ProjectsPage() {
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="h-3.5 w-3.5" />
-                    {service.duration_minutes}min
+                    {service.duration_min}min
                   </div>
                   <div className="flex items-center gap-1">
                     <Users className="h-3.5 w-3.5" />
@@ -293,16 +289,6 @@ export default function ProjectsPage() {
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Describe the service..."
-                rows={3}
-              />
-            </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="price">Price ($)</Label>
@@ -321,8 +307,8 @@ export default function ProjectsPage() {
                 <Input
                   id="duration"
                   type="number"
-                  value={formData.duration_minutes}
-                  onChange={(e) => setFormData({ ...formData, duration_minutes: parseInt(e.target.value) || 30 })}
+                  value={formData.duration_min}
+                  onChange={(e) => setFormData({ ...formData, duration_min: parseInt(e.target.value) || 30 })}
                   min={5}
                   required
                 />

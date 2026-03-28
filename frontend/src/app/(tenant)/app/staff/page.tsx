@@ -42,7 +42,7 @@ export default function StaffPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Staff | null>(null);
-  const [formData, setFormData] = useState({ name: "", email: "", phone: "", is_active: true });
+  const [formData, setFormData] = useState({ name: "", is_active: true });
   const [submitting, setSubmitting] = useState(false);
 
   const fetchStaff = async () => {
@@ -63,8 +63,7 @@ export default function StaffPage() {
 
   const filteredStaff = staff.filter(
     (s) =>
-      s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.email.toLowerCase().includes(searchTerm.toLowerCase())
+      s.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,7 +79,7 @@ export default function StaffPage() {
       }
       setShowModal(false);
       setEditingStaff(null);
-      setFormData({ name: "", email: "", phone: "", is_active: true });
+            setFormData({ name: "", is_active: true });
       fetchStaff();
     } catch (err: any) {
       toast.error(err.message || "Failed to save staff");
@@ -91,7 +90,7 @@ export default function StaffPage() {
 
   const handleEdit = (s: Staff) => {
     setEditingStaff(s);
-    setFormData({ name: s.name, email: s.email, phone: s.phone || "", is_active: s.is_active });
+    setFormData({ name: s.name, is_active: s.is_active });
     setShowModal(true);
   };
 
@@ -127,7 +126,7 @@ export default function StaffPage() {
         <Button
           onClick={() => {
             setEditingStaff(null);
-            setFormData({ name: "", email: "", phone: "", is_active: true });
+      setFormData({ name: "", is_active: true });
             setShowModal(true);
           }}
         >
@@ -152,8 +151,6 @@ export default function StaffPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-[80px]">Actions</TableHead>
               </TableRow>
@@ -161,7 +158,7 @@ export default function StaffPage() {
             <TableBody>
               {filteredStaff.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
+                  <TableCell colSpan={3} className="h-24 text-center">
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
                       <UserCheck className="h-8 w-8" />
                       <p>No staff found</p>
@@ -179,8 +176,6 @@ export default function StaffPage() {
                         <span className="font-medium">{member.name}</span>
                       </div>
                     </TableCell>
-                    <TableCell>{member.email}</TableCell>
-                    <TableCell className="text-muted-foreground">{member.phone || "-"}</TableCell>
                     <TableCell>
                       <Badge variant={member.is_active ? "success" : "secondary"}>
                         {member.is_active ? "Active" : "Inactive"}
@@ -225,14 +220,6 @@ export default function StaffPage() {
             <div className="space-y-2">
               <Label>Name</Label>
               <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
-            </div>
-            <div className="space-y-2">
-              <Label>Email</Label>
-              <Input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
-            </div>
-            <div className="space-y-2">
-              <Label>Phone</Label>
-              <Input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>

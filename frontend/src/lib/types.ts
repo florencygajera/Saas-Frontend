@@ -7,7 +7,6 @@ export interface User {
   email: string;
   role: UserRole;
   tenant_id?: string;
-  tenant_name?: string;
   name?: string;
 }
 
@@ -18,95 +17,99 @@ export interface LoginResponse {
   user: User;
 }
 
+// Top tenant item (Platform stats)
+export interface TopTenantItem {
+  tenant_id: string;
+  tenant_name: string;
+  revenue: number;
+}
+
 // Platform stats (Super Admin)
 export interface PlatformStats {
-  total_tenants: number;
-  active_tenants: number;
+  platform_revenue: number;
   total_bookings: number;
-  total_revenue: number;
-  tenants_by_plan: Record<string, number>;
+  active_tenants: number;
+  new_tenants_last_30d: number;
+  top_tenants_by_revenue: TopTenantItem[];
 }
 
 // Tenant type
 export interface Tenant {
   id: string;
   name: string;
-  slug: string;
-  is_active: boolean;
   plan: string;
+  is_active: boolean;
   created_at: string;
-  tenant_admin_email?: string;
+}
+
+// Top service item (Tenant stats)
+export interface TopServiceItem {
+  service_id: string;
+  service_name: string;
+  bookings: number;
+  revenue: number;
 }
 
 // Tenant stats
 export interface TenantStats {
-  total_customers: number;
+  revenue: number;
   total_bookings: number;
-  total_revenue: number;
-  active_services: number;
-  active_staff: number;
-  bookings_by_status: Record<string, number>;
+  completed_count: number;
+  cancelled_count: number;
+  top_services: TopServiceItem[];
+  heatmap_7x24: number[][];
 }
 
-// Tenant admin stats
-export interface TenantAdminStats {
-  total_customers: number;
-  total_bookings: number;
-  total_revenue: number;
-  today_appointments: number;
-  pending_appointments: number;
-}
+// Tenant admin stats (same as TenantStats)
+export type TenantAdminStats = TenantStats;
 
 // Service type
 export interface Service {
   id: string;
-  name: string;
-  description?: string;
-  price: number;
-  duration_minutes: number;
-  is_active: boolean;
   tenant_id: string;
+  name: string;
+  duration_min: number;
+  price: number;
+  is_active: boolean;
+  created_at: string;
 }
 
 // Staff type
 export interface Staff {
   id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  is_active: boolean;
   tenant_id: string;
-  services?: string[];
+  name: string;
+  is_active: boolean;
+  created_at: string;
 }
 
 // Customer type
 export interface Customer {
   id: string;
-  name: string;
-  email: string;
-  phone?: string;
   tenant_id: string;
+  user_id?: string;
+  name: string;
+  phone?: string;
+  email?: string;
   created_at: string;
 }
 
 // Appointment type
 export interface Appointment {
   id: string;
-  customer_id: string;
-  customer_name?: string;
-  service_id: string;
-  service_name?: string;
-  staff_id: string;
-  staff_name?: string;
   tenant_id: string;
-  start_time: string;
-  end_time: string;
-  status: AppointmentStatus;
+  customer_id: string;
+  staff_id?: string;
+  service_id: string;
+  start_at: string;
+  end_at: string;
+  status: string;
   notes?: string;
-  total_price: number;
-  payment_status?: PaymentStatus;
+  created_at: string;
+  updated_at: string;
 }
 
+// Appointment statuses
 export type AppointmentStatus = 
   | 'pending' 
   | 'confirmed' 
@@ -114,42 +117,21 @@ export type AppointmentStatus =
   | 'completed' 
   | 'cancelled';
 
-export type PaymentStatus = 
-  | 'pending' 
-  | 'paid' 
-  | 'failed' 
-  | 'refunded';
+// Booking type (same as Appointment from customer perspective)
+export type Booking = Appointment;
 
-// Booking type (Customer view)
-export interface Booking {
-  id: string;
-  service_id: string;
-  service_name: string;
-  service_price: number;
-  start_time: string;
-  end_time: string;
-  status: AppointmentStatus;
-  payment_status: PaymentStatus;
-  tenant_name: string;
-  tenant_id: string;
-}
-
-// Public service (Customer view)
-export interface PublicService {
-  id: string;
-  name: string;
-  description?: string;
-  price: number;
-  duration_minutes: number;
-  tenant_name: string;
-  tenant_id: string;
-}
+// Public service (same as Service)
+export type PublicService = Service;
 
 // Payment types
 export interface PaymentStartResponse {
+  id: string;
+  tenant_id: string;
   appointment_id: string;
   amount: number;
+  currency: string;
   status: string;
+  created_at: string;
 }
 
 export interface PaymentVerifyRequest {
@@ -158,10 +140,20 @@ export interface PaymentVerifyRequest {
 }
 
 export interface PaymentVerifyResponse {
-  success: boolean;
+  payment_id: string;
+  appointment_id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  paid_at: string;
   message: string;
-  transaction_id?: string;
 }
+
+export type PaymentStatus = 
+  | 'pending' 
+  | 'paid' 
+  | 'failed' 
+  | 'refunded';
 
 // API Error
 export interface ApiError {

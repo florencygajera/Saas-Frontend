@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -44,9 +43,8 @@ export default function ServicesPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<Service | null>(null);
   const [formData, setFormData] = useState({
     name: "",
-    description: "",
     price: 0,
-    duration_minutes: 30,
+    duration_min: 30,
     is_active: true,
   });
   const [submitting, setSubmitting] = useState(false);
@@ -69,8 +67,7 @@ export default function ServicesPage() {
 
   const filteredServices = services.filter(
     (s) =>
-      s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (s.description && s.description.toLowerCase().includes(searchTerm.toLowerCase()))
+      s.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -86,7 +83,7 @@ export default function ServicesPage() {
       }
       setShowModal(false);
       setEditingService(null);
-      setFormData({ name: "", description: "", price: 0, duration_minutes: 30, is_active: true });
+            setFormData({ name: "", price: 0, duration_min: 30, is_active: true });
       fetchServices();
     } catch (err: any) {
       toast.error(err.message || "Failed to save service");
@@ -99,9 +96,8 @@ export default function ServicesPage() {
     setEditingService(s);
     setFormData({
       name: s.name,
-      description: s.description || "",
       price: s.price,
-      duration_minutes: s.duration_minutes,
+      duration_min: s.duration_min,
       is_active: s.is_active,
     });
     setShowModal(true);
@@ -139,7 +135,7 @@ export default function ServicesPage() {
         <Button
           onClick={() => {
             setEditingService(null);
-            setFormData({ name: "", description: "", price: 0, duration_minutes: 30, is_active: true });
+      setFormData({ name: "", price: 0, duration_min: 30, is_active: true });
             setShowModal(true);
           }}
         >
@@ -164,7 +160,6 @@ export default function ServicesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Description</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead>Duration</TableHead>
                 <TableHead>Status</TableHead>
@@ -174,7 +169,7 @@ export default function ServicesPage() {
             <TableBody>
               {filteredServices.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
+                  <TableCell colSpan={5} className="h-24 text-center">
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
                       <Scissors className="h-8 w-8" />
                       <p>No services found</p>
@@ -185,11 +180,8 @@ export default function ServicesPage() {
                 filteredServices.map((service) => (
                   <TableRow key={service.id}>
                     <TableCell className="font-medium">{service.name}</TableCell>
-                    <TableCell className="text-muted-foreground max-w-[200px] truncate">
-                      {service.description || "-"}
-                    </TableCell>
                     <TableCell>${service.price}</TableCell>
-                    <TableCell>{service.duration_minutes} min</TableCell>
+                    <TableCell>{service.duration_min} min</TableCell>
                     <TableCell>
                       <Badge variant={service.is_active ? "success" : "secondary"}>
                         {service.is_active ? "Active" : "Inactive"}
@@ -245,16 +237,6 @@ export default function ServicesPage() {
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Describe the service..."
-                rows={3}
-              />
-            </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="price">Price ($)</Label>
@@ -273,8 +255,8 @@ export default function ServicesPage() {
                 <Input
                   id="duration"
                   type="number"
-                  value={formData.duration_minutes}
-                  onChange={(e) => setFormData({ ...formData, duration_minutes: parseInt(e.target.value) || 30 })}
+                  value={formData.duration_min}
+                  onChange={(e) => setFormData({ ...formData, duration_min: parseInt(e.target.value) || 30 })}
                   min={5}
                   required
                 />

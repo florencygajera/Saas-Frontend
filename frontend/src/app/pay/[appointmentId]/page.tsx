@@ -20,6 +20,7 @@ export default function PaymentPage() {
   const [error, setError] = useState<string | null>(null);
   const [otp, setOtp] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState<number>(0);
 
   useEffect(() => {
     const fetchBooking = async () => {
@@ -28,8 +29,6 @@ export default function PaymentPage() {
         const found = bookings.find(b => b.id === appointmentId);
         if (!found) {
           setError('Booking not found');
-        } else if (found.payment_status === 'paid') {
-          setError('This booking has already been paid');
         } else {
           setBooking(found);
         }
@@ -51,6 +50,7 @@ export default function PaymentPage() {
 
     try {
       const response = await paymentApi.startPayment(appointmentId);
+      setPaymentAmount(response.amount);
       setStep('otp');
     } catch (err: any) {
       setError(err.response?.data?.detail || err.message || 'Failed to start payment');
@@ -67,7 +67,7 @@ export default function PaymentPage() {
 
     try {
       const response = await paymentApi.verifyPayment(appointmentId, otp);
-      if (response.success) {
+      if (response.status === 'paid') {
         setStep('success');
       } else {
         setError(response.message || 'Payment verification failed');
@@ -115,16 +115,14 @@ export default function PaymentPage() {
               <h1 className="text-2xl font-bold text-gray-900 mb-6">Payment</h1>
               
               <div className="border-b pb-4 mb-4">
-                <h2 className="text-lg font-semibold">{booking.service_name}</h2>
-                <p className="text-gray-600 text-sm">{booking.tenant_name}</p>
                 <p className="text-gray-600 text-sm">
-                  {new Date(booking.start_time).toLocaleString()}
+                  {new Date(booking.start_at).toLocaleString()}
                 </p>
               </div>
 
               <div className="flex justify-between items-center mb-6">
-                <span className="text-gray-600">Total Amount</span>
-                <span className="text-2xl font-bold text-gray-900">${booking.service_price}</span>
+                <span className="text-gray-600">Amount</span>
+                <span className="text-2xl font-bold text-gray-900">${paymentAmount}</span>
               </div>
 
               {error && (
@@ -204,7 +202,7 @@ export default function PaymentPage() {
               
               <div className="bg-gray-50 rounded-lg p-4 mb-6">
                 <p className="text-sm text-gray-600">Amount Paid</p>
-                <p className="text-2xl font-bold text-gray-900">${booking?.service_price}</p>
+                <p className="text-2xl font-bold text-gray-900">${paymentAmount}</p>
               </div>
 
               <Link

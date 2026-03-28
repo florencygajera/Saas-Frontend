@@ -8,7 +8,7 @@ import { ErrorState } from '@/components/ErrorState';
 import { bookingApi } from '@/lib/api';
 import { Booking } from '@/lib/types';
 import Link from 'next/link';
-import { CreditCard, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
 export default function MyBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -62,35 +62,15 @@ export default function MyBookingsPage() {
     }
   };
 
-  const getPaymentColor = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'failed':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   const canCancel = (status: string) => {
     return status === 'pending' || status === 'confirmed';
   };
 
   const columns = [
-    { key: 'service_name', header: 'Service' },
-    { key: 'tenant_name', header: 'Business' },
     {
-      key: 'start_time',
+      key: 'start_at',
       header: 'Date/Time',
-      render: (b: Booking) => new Date(b.start_time).toLocaleString(),
-    },
-    {
-      key: 'service_price',
-      header: 'Price',
-      render: (b: Booking) => `$${b.service_price}`,
+      render: (b: Booking) => new Date(b.start_at).toLocaleString(),
     },
     {
       key: 'status',
@@ -102,28 +82,10 @@ export default function MyBookingsPage() {
       ),
     },
     {
-      key: 'payment_status',
-      header: 'Payment',
-      render: (b: Booking) => (
-        <span className={`px-2 py-1 rounded-full text-xs ${getPaymentColor(b.payment_status)}`}>
-          {b.payment_status?.toUpperCase() || 'N/A'}
-        </span>
-      ),
-    },
-    {
       key: 'actions',
       header: 'Actions',
       render: (b: Booking) => (
         <div className="flex space-x-2">
-          {b.payment_status === 'pending' && b.status !== 'cancelled' && (
-            <Link
-              href={`/pay/${b.id}`}
-              className="flex items-center px-2 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"
-            >
-              <CreditCard className="w-3 h-3 mr-1" />
-              Pay
-            </Link>
-          )}
           {canCancel(b.status) && (
             <button
               onClick={() => handleCancel(b.id)}

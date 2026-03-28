@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { KpiCard } from "@/components/widgets/kpi-card";
-import { ArrowLeft, Users, Calendar, DollarSign, Scissors, RefreshCw } from "lucide-react";
+import { ArrowLeft, Calendar, DollarSign, RefreshCw, XCircle, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -62,26 +62,26 @@ export default function TenantStatsPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <KpiCard title="Customers" value={stats?.total_customers || 0} icon={<Users className="h-6 w-6" />} />
-        <KpiCard title="Bookings" value={stats?.total_bookings || 0} icon={<Calendar className="h-6 w-6" />} />
-        <KpiCard title="Revenue" value={`$${(stats?.total_revenue || 0).toLocaleString()}`} icon={<DollarSign className="h-6 w-6" />} />
-        <KpiCard title="Active Services" value={stats?.active_services || 0} icon={<Scissors className="h-6 w-6" />} />
-        <KpiCard title="Active Staff" value={stats?.active_staff || 0} icon={<Users className="h-6 w-6" />} />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <KpiCard title="Total Bookings" value={stats?.total_bookings || 0} icon={<Calendar className="h-6 w-6" />} />
+        <KpiCard title="Revenue" value={`$${(stats?.revenue || 0).toLocaleString()}`} icon={<DollarSign className="h-6 w-6" />} />
+        <KpiCard title="Completed" value={stats?.completed_count || 0} icon={<TrendingUp className="h-6 w-6" />} />
+        <KpiCard title="Cancelled" value={stats?.cancelled_count || 0} icon={<XCircle className="h-6 w-6" />} />
       </div>
 
-      {stats?.bookings_by_status && (
+      {stats?.top_services && stats.top_services.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base font-semibold">Bookings by Status</CardTitle>
-            <CardDescription>Distribution of appointment statuses</CardDescription>
+            <CardTitle className="text-base font-semibold">Top Services</CardTitle>
+            <CardDescription>Best performing services by bookings</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-              {Object.entries(stats.bookings_by_status).map(([status, count]) => (
-                <div key={status} className="rounded-2xl bg-muted/50 p-4 text-center">
-                  <p className="text-sm text-muted-foreground capitalize">{status.replace("_", " ")}</p>
-                  <p className="mt-1 text-2xl font-bold">{count}</p>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+              {stats.top_services.map((svc) => (
+                <div key={svc.service_id} className="rounded-2xl bg-muted/50 p-4 text-center">
+                  <p className="text-sm font-medium">{svc.service_name}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{svc.bookings} bookings</p>
+                  <p className="mt-1 text-lg font-bold">${svc.revenue.toLocaleString()}</p>
                 </div>
               ))}
             </div>

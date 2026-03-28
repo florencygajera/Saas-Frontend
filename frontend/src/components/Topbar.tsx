@@ -20,11 +20,6 @@ export const Topbar: React.FC<TopbarProps> = ({ title }) => {
             <User className="w-5 h-5 text-gray-500" />
             <span className="text-sm text-gray-700">
               {user?.email}
-              {user?.tenant_name && (
-                <span className="ml-2 text-xs text-gray-500">
-                  ({user.tenant_name})
-                </span>
-              )}
             </span>
           </div>
           <button

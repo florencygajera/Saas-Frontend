@@ -51,7 +51,7 @@ export default function NewBookingPage() {
     try {
       await bookingApi.createBooking({
         service_id: service.id,
-        start_time: new Date(dateTime).toISOString(),
+        start_at: new Date(dateTime).toISOString(),
         notes,
       });
       setSuccess('Booking created successfully!');
@@ -96,12 +96,11 @@ export default function NewBookingPage() {
         <div className="max-w-2xl mx-auto">
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4">{service.name}</h2>
-            <p className="text-gray-600 text-sm mb-4">{service.tenant_name}</p>
             
             <div className="flex items-center space-x-4 text-sm text-gray-500 mb-6">
               <div className="flex items-center">
                 <Clock className="w-4 h-4 mr-1" />
-                {service.duration_minutes} min
+                {service.duration_min} min
               </div>
               <div className="flex items-center">
                 <DollarSign className="w-4 h-4 mr-1" />

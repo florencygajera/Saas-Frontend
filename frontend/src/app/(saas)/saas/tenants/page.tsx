@@ -53,8 +53,7 @@ export default function TenantsPage() {
 
   const filteredTenants = tenants.filter(
     (t) =>
-      t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.slug.toLowerCase().includes(searchTerm.toLowerCase())
+      t.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -98,7 +97,6 @@ export default function TenantsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Slug</TableHead>
                 <TableHead>Plan</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Created</TableHead>
@@ -107,7 +105,7 @@ export default function TenantsPage() {
             <TableBody>
               {filteredTenants.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
+                  <TableCell colSpan={4} className="h-24 text-center">
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
                       <Building2 className="h-8 w-8" />
                       <p>No tenants found</p>
@@ -125,7 +123,6 @@ export default function TenantsPage() {
                         {tenant.name}
                       </Link>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{tenant.slug}</TableCell>
                     <TableCell>
                       <Badge variant="secondary" className="capitalize">{tenant.plan}</Badge>
                     </TableCell>

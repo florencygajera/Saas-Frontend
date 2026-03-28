@@ -61,16 +61,12 @@ export default function CustomerHome() {
             <Card key={service.id} className="transition-shadow hover:shadow-md">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base font-semibold">{service.name}</CardTitle>
-                <CardDescription>{service.tenant_name}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {service.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-2">{service.description}</p>
-                )}
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Clock className="h-3.5 w-3.5" />
-                    {service.duration_minutes} min
+                    {service.duration_min} min
                   </div>
                   <div className="flex items-center gap-1">
                     <DollarSign className="h-3.5 w-3.5" />

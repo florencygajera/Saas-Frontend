@@ -74,13 +74,13 @@ export default function SaaSDashboard() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          title="Total Tenants"
-          value={stats?.total_tenants || 0}
+          title="Active Tenants"
+          value={stats?.active_tenants || 0}
           icon={<Building2 className="h-6 w-6" />}
         />
         <KpiCard
-          title="Active Tenants"
-          value={stats?.active_tenants || 0}
+          title="New Tenants (30d)"
+          value={stats?.new_tenants_last_30d || 0}
           icon={<Users className="h-6 w-6" />}
         />
         <KpiCard
@@ -89,8 +89,8 @@ export default function SaaSDashboard() {
           icon={<Calendar className="h-6 w-6" />}
         />
         <KpiCard
-          title="Total Revenue"
-          value={`$${(stats?.total_revenue || 0).toLocaleString()}`}
+          title="Platform Revenue"
+          value={`$${(stats?.platform_revenue || 0).toLocaleString()}`}
           icon={<DollarSign className="h-6 w-6" />}
         />
       </div>
@@ -113,7 +113,6 @@ export default function SaaSDashboard() {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Slug</TableHead>
                 <TableHead>Plan</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Created</TableHead>
@@ -130,7 +129,6 @@ export default function SaaSDashboard() {
                       {tenant.name}
                     </Link>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{tenant.slug}</TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="capitalize">{tenant.plan}</Badge>
                   </TableCell>

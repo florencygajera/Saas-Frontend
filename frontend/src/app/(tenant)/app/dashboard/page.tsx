@@ -114,7 +114,7 @@ export default function TenantDashboard() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            Welcome back, {user?.tenant_name || "Business"}!
+            Welcome back!
           </h1>
           <p className="text-muted-foreground">Here&apos;s what&apos;s happening with your business today.</p>
         </div>
@@ -135,13 +135,6 @@ export default function TenantDashboard() {
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          title="Total Customers"
-          value={stats?.total_customers || 0}
-          change={12}
-          changeLabel="vs last month"
-          icon={<Users className="h-6 w-6" />}
-        />
-        <KpiCard
           title="Total Bookings"
           value={stats?.total_bookings || 0}
           change={8}
@@ -149,15 +142,22 @@ export default function TenantDashboard() {
           icon={<Calendar className="h-6 w-6" />}
         />
         <KpiCard
-          title="Total Revenue"
-          value={`$${(stats?.total_revenue || 0).toLocaleString()}`}
+          title="Revenue"
+          value={`$${(stats?.revenue || 0).toLocaleString()}`}
           change={15}
           changeLabel="vs last month"
           icon={<DollarSign className="h-6 w-6" />}
         />
         <KpiCard
-          title="Pending Appointments"
-          value={stats?.pending_appointments || 0}
+          title="Completed"
+          value={stats?.completed_count || 0}
+          change={12}
+          changeLabel="vs last month"
+          icon={<Users className="h-6 w-6" />}
+        />
+        <KpiCard
+          title="Cancelled"
+          value={stats?.cancelled_count || 0}
           icon={<Clock className="h-6 w-6" />}
         />
       </div>

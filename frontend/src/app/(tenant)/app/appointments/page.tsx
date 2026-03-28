@@ -109,18 +109,14 @@ export default function AppointmentsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Service</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Staff</TableHead>
                 <TableHead>Date/Time</TableHead>
-                <TableHead>Price</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {appointments.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
+                  <TableCell colSpan={2} className="h-24 text-center">
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
                       <Calendar className="h-8 w-8" />
                       <p>No appointments found</p>
@@ -130,11 +126,7 @@ export default function AppointmentsPage() {
               ) : (
                 appointments.map((apt) => (
                   <TableRow key={apt.id}>
-                    <TableCell className="font-medium">{apt.service_name || "-"}</TableCell>
-                    <TableCell>{apt.customer_name || "-"}</TableCell>
-                    <TableCell className="text-muted-foreground">{apt.staff_name || "-"}</TableCell>
-                    <TableCell>{new Date(apt.start_time).toLocaleString()}</TableCell>
-                    <TableCell>${apt.total_price}</TableCell>
+                    <TableCell>{new Date(apt.start_at).toLocaleString()}</TableCell>
                     <TableCell>
                       <Select
                         value={apt.status}

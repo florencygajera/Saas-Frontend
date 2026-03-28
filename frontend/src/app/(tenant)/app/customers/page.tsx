@@ -77,7 +77,7 @@ export default function CustomersPage() {
   const filteredCustomers = customers.filter(
     (c) =>
       c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (c.email && c.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (c.phone && c.phone.includes(searchTerm))
   );
 
@@ -111,7 +111,7 @@ export default function CustomersPage() {
 
   const handleEdit = (c: Customer) => {
     setEditingCustomer(c);
-    setFormData({ name: c.name, email: c.email, phone: c.phone || "" });
+    setFormData({ name: c.name, email: c.email || "", phone: c.phone || "" });
     setShowModal(true);
   };
 
@@ -214,7 +214,7 @@ export default function CustomersPage() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Mail className="h-3.5 w-3.5 text-muted-foreground" />
-                        {customer.email}
+                        {customer.email || "-"}
                       </div>
                     </TableCell>
                     <TableCell>
