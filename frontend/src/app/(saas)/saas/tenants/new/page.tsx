@@ -4,13 +4,13 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
 import { saasApi } from "@/lib/api";
 import { Tenant, TenantProvisionResult } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SectionHeader } from "@/components/dashboard/section-header";
 import {
   Select,
   SelectContent,
@@ -80,9 +80,21 @@ export default function NewTenantPage() {
 
   if (result) {
     return (
-      <div className="p-6">
-        <div className="max-w-2xl mx-auto">
-          <Card>
+      <div className="space-y-6 p-6">
+        <SectionHeader
+          title="Tenant Provisioned"
+          description="Credentials generated successfully. Store them securely."
+          action={
+            <Button variant="outline" asChild>
+              <Link href="/saas/tenants">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Link>
+            </Button>
+          }
+        />
+        <div className="mx-auto max-w-2xl">
+          <Card className="rounded-2xl border-border/70 shadow-sm">
             <CardContent className="pt-6 text-center space-y-6">
               <div className="flex justify-center">
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
@@ -93,7 +105,7 @@ export default function NewTenantPage() {
                 <h2 className="text-2xl font-bold">Tenant Provisioned!</h2>
                 <p className="text-muted-foreground mt-1">Save these credentials - they will not be shown again.</p>
               </div>
-              <div className="rounded-2xl bg-muted/50 p-6 text-left space-y-3">
+              <div className="rounded-2xl border border-border/70 bg-muted/30 p-6 text-left space-y-3">
                 <div>
                   <p className="text-xs font-medium text-muted-foreground uppercase">Tenant ID</p>
                   <p className="font-mono text-sm">{result.tenant.id}</p>
@@ -127,14 +139,21 @@ export default function NewTenantPage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <Link href="/saas/tenants" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Tenants
-        </Link>
-
-        <Card>
+    <div className="space-y-6 p-6">
+      <SectionHeader
+        title="Provision New Tenant"
+        description="Create a tenant and admin user in a single flow."
+        action={
+          <Button variant="outline" asChild>
+            <Link href="/saas/tenants">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Tenants
+            </Link>
+          </Button>
+        }
+      />
+      <div className="mx-auto max-w-2xl space-y-6">
+        <Card className="rounded-2xl border-border/70 shadow-sm">
           <CardHeader>
             <CardTitle>Provision New Tenant</CardTitle>
             <CardDescription>Create a new tenant with an admin account</CardDescription>

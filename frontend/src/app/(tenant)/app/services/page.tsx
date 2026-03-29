@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import { tenantApi } from "@/lib/api";
 import { Service } from "@/lib/types";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SectionHeader } from "@/components/dashboard/section-header";
+import { TableCard } from "@/components/dashboard/table-card";
+import { StatCard } from "@/components/dashboard/stat-card";
 import {
   Dialog,
   DialogContent,
@@ -31,7 +33,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Plus, Search, MoreHorizontal, Edit2, Trash2, Scissors } from "lucide-react";
+import { Plus, Search, MoreHorizontal, Edit2, Trash2, Scissors, CircleDollarSign, Clock3 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ServicesPage() {
@@ -69,6 +71,9 @@ export default function ServicesPage() {
     (s) =>
       s.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const activeCount = services.filter((service) => service.is_active).length;
+  const avgPrice = services.length > 0 ? services.reduce((sum, service) => sum + service.price, 0) / services.length : 0;
+  const avgDuration = services.length > 0 ? services.reduce((sum, service) => sum + service.duration_min, 0) / services.length : 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,12 +132,11 @@ export default function ServicesPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Services</h1>
-          <p className="text-muted-foreground">Manage your service offerings</p>
-        </div>
-        <Button
+      <SectionHeader
+        title="Services"
+        description="Manage your service catalog, pricing, and availability."
+        action={
+          <Button
           onClick={() => {
             setEditingService(null);
       setFormData({ name: "", price: 0, duration_min: 30, is_active: true });
@@ -141,7 +145,14 @@ export default function ServicesPage() {
         >
           <Plus className="mr-2 h-4 w-4" />
           Add Service
-        </Button>
+          </Button>
+        }
+      />
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard title="Total Services" value={services.length} trendPercent={100} trendLabel="catalog size" icon={<Scissors className="h-5 w-5" />} />
+        <StatCard title="Active Services" value={activeCount} trendPercent={services.length ? (activeCount / services.length) * 100 : 0} trendLabel="active ratio" icon={<CircleDollarSign className="h-5 w-5" />} />
+        <StatCard title="Avg Duration" value={`${Math.round(avgDuration)} min`} trendPercent={avgPrice} trendLabel="avg price index" icon={<Clock3 className="h-5 w-5" />} />
       </div>
 
       <div className="relative max-w-sm">
@@ -154,8 +165,7 @@ export default function ServicesPage() {
         />
       </div>
 
-      <Card>
-        <CardContent className="p-0">
+      <TableCard title="Service List" description={`${filteredServices.length} matching result(s)`}>
           <Table>
             <TableHeader>
               <TableRow>
@@ -214,8 +224,7 @@ export default function ServicesPage() {
               )}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+      </TableCard>
 
       {/* Create/Edit Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>

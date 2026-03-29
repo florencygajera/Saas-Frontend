@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import { tenantApi } from "@/lib/api";
 import { Staff } from "@/lib/types";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SectionHeader } from "@/components/dashboard/section-header";
+import { TableCard } from "@/components/dashboard/table-card";
+import { StatCard } from "@/components/dashboard/stat-card";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Plus, Search, MoreHorizontal, Edit2, Trash2, UserCheck } from "lucide-react";
+import { Plus, Search, MoreHorizontal, Edit2, Trash2, UserCheck, Users, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
 
 export default function StaffPage() {
@@ -65,6 +67,7 @@ export default function StaffPage() {
     (s) =>
       s.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const activeStaff = staff.filter((member) => member.is_active).length;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,12 +121,11 @@ export default function StaffPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Staff</h1>
-          <p className="text-muted-foreground">Manage your team members</p>
-        </div>
-        <Button
+      <SectionHeader
+        title="Staff"
+        description="Manage your team members and their active status."
+        action={
+          <Button
           onClick={() => {
             setEditingStaff(null);
       setFormData({ name: "", is_active: true });
@@ -132,7 +134,14 @@ export default function StaffPage() {
         >
           <Plus className="mr-2 h-4 w-4" />
           Add Staff
-        </Button>
+          </Button>
+        }
+      />
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard title="Total Staff" value={staff.length} trendPercent={100} trendLabel="team size" icon={<Users className="h-5 w-5" />} />
+        <StatCard title="Active Members" value={activeStaff} trendPercent={staff.length ? (activeStaff / staff.length) * 100 : 0} trendLabel="active ratio" icon={<BadgeCheck className="h-5 w-5" />} />
+        <StatCard title="Search Results" value={filteredStaff.length} trendPercent={filteredStaff.length} trendLabel="matching query" icon={<Search className="h-5 w-5" />} />
       </div>
 
       <div className="relative max-w-sm">
@@ -145,8 +154,7 @@ export default function StaffPage() {
         />
       </div>
 
-      <Card>
-        <CardContent className="p-0">
+      <TableCard title="Team Directory" description="Staff listing and quick actions">
           <Table>
             <TableHeader>
               <TableRow>
@@ -208,8 +216,7 @@ export default function StaffPage() {
               )}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+      </TableCard>
 
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent>

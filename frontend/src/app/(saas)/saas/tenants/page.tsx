@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import { saasApi } from "@/lib/api";
 import { Tenant } from "@/lib/types";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SectionHeader } from "@/components/dashboard/section-header";
+import { TableCard } from "@/components/dashboard/table-card";
+import { StatCard } from "@/components/dashboard/stat-card";
 import {
   Table,
   TableBody,
@@ -17,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Link from "next/link";
-import { Plus, Search, Building2 } from "lucide-react";
+import { Plus, Search, Building2, CheckCircle2, PauseCircle, Layers } from "lucide-react";
 import { toast } from "sonner";
 
 export default function TenantsPage() {
@@ -55,6 +57,9 @@ export default function TenantsPage() {
     (t) =>
       t.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const activeCount = tenants.filter((tenant) => tenant.is_active).length;
+  const inactiveCount = Math.max(0, tenants.length - activeCount);
+  const proPlanCount = tenants.filter((tenant) => tenant.plan === "pro" || tenant.plan === "enterprise").length;
 
   if (loading) {
     return (
@@ -68,17 +73,23 @@ export default function TenantsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Tenants</h1>
-          <p className="text-muted-foreground">Manage platform tenants</p>
-        </div>
-        <Button asChild>
+      <SectionHeader
+        title="Tenants"
+        description="Manage platform tenants, plans, and activation status."
+        action={
+          <Button asChild>
           <Link href="/saas/tenants/new">
             <Plus className="mr-2 h-4 w-4" />
             New Tenant
           </Link>
-        </Button>
+          </Button>
+        }
+      />
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard title="Total Tenants" value={tenants.length} trendPercent={100} trendLabel="current base" icon={<Building2 className="h-5 w-5" />} />
+        <StatCard title="Active" value={activeCount} trendPercent={tenants.length ? (activeCount / tenants.length) * 100 : 0} trendLabel="activation rate" icon={<CheckCircle2 className="h-5 w-5" />} />
+        <StatCard title="Pro / Enterprise" value={proPlanCount} trendPercent={tenants.length ? (proPlanCount / tenants.length) * 100 : 0} trendLabel="higher tiers" icon={<Layers className="h-5 w-5" />} />
       </div>
 
       <div className="relative max-w-sm">
@@ -91,8 +102,7 @@ export default function TenantsPage() {
         />
       </div>
 
-      <Card>
-        <CardContent className="p-0">
+      <TableCard title="Tenant Directory" description={`Active: ${activeCount}, Inactive: ${inactiveCount}`}>
           <Table>
             <TableHeader>
               <TableRow>
@@ -141,8 +151,7 @@ export default function TenantsPage() {
               )}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+      </TableCard>
     </div>
   );
 }
