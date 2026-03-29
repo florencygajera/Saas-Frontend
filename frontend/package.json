@@ -8,8 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
-    "type-check": "tsc --noEmit",
-    "prepare": "cd .. && husky install"
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.0",

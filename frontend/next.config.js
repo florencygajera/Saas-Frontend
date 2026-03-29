@@ -4,9 +4,6 @@ const path = require('path');
 const nextConfig = {
   reactStrictMode: true,
   
-  // Enable SWC minification for faster builds
-  swcMinify: true,
-  
   // Image optimization
   images: {
     formats: ['image/avif', 'image/webp'],

@@ -7,6 +7,7 @@ import { z } from "zod";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
 import { authApi } from "@/lib/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,8 +42,8 @@ export default function LoginPage() {
     try {
       const response = await authApi.login(data.email, data.password);
       await login(response.access_token);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message || "Invalid credentials. Please try again.");
+    } catch (error: unknown) {
+      setError(getApiErrorMessage(error, "Invalid credentials. Please try again."));
     } finally {
       setLoading(false);
     }
