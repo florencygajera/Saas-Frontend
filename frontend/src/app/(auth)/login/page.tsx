@@ -94,7 +94,7 @@ export default function LoginPage() {
               type={showPassword ? "text" : "password"}
               {...register("password")}
               className="pl-10 pr-10"
-              placeholder="••••••••"
+              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
             />
             <button
               type="button"

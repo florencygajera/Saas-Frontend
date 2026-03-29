@@ -5,11 +5,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { authApi } from "@/lib/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AuthShell } from "@/components/auth/auth-shell";
-import { Mail, Lock, User, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff, CheckCircle, AlertCircle } from "lucide-react";
 
 const signupSchema = z
   .object({
@@ -26,9 +30,11 @@ const signupSchema = z
 type SignupFormData = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
@@ -38,12 +44,22 @@ export default function SignupPage() {
     resolver: zodResolver(signupSchema),
   });
 
-  const onSubmit = async (_data: SignupFormData) => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+  const onSubmit = async (data: SignupFormData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      await authApi.signup({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      });
       setSuccess(true);
-    }, 1500);
+      router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`);
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Failed to create account"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (success) {
@@ -63,11 +79,8 @@ export default function SignupPage() {
           </div>
           <div className="space-y-2">
             <h2 className="text-2xl font-bold">Account created!</h2>
-            <p className="text-muted-foreground">Please verify your email address before signing in.</p>
+            <p className="text-muted-foreground">Redirecting to email verification.</p>
           </div>
-          <Button asChild className="w-full">
-            <Link href="/login">Go to Sign In</Link>
-          </Button>
         </div>
       </AuthShell>
     );
@@ -87,6 +100,13 @@ export default function SignupPage() {
       ]}
       gradientClassName="from-cyan-700 via-blue-700 to-indigo-700"
     >
+      {error ? (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div className="space-y-2">
           <Label htmlFor="name">Full Name</Label>

@@ -1,15 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import Link from "next/link";
+import { authApi } from "@/lib/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AuthShell } from "@/components/auth/auth-shell";
-import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
+import { Mail, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
 
 const forgotSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -20,6 +23,7 @@ type ForgotFormData = z.infer<typeof forgotSchema>;
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
@@ -29,12 +33,17 @@ export default function ForgotPasswordPage() {
     resolver: zodResolver(forgotSchema),
   });
 
-  const onSubmit = async (_data: ForgotFormData) => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+  const onSubmit = async (data: ForgotFormData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      await authApi.forgotPassword(data.email);
       setSuccess(true);
-    }, 1500);
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Failed to send reset link"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -57,6 +66,13 @@ export default function ForgotPasswordPage() {
       }
       gradientClassName="from-indigo-700 via-blue-700 to-cyan-700"
     >
+      {error ? (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
+
       {success ? (
         <div className="space-y-6 text-center">
           <div className="flex justify-center">

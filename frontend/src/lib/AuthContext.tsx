@@ -9,7 +9,7 @@ interface AuthContextType {
   user: User | null;
   role: UserRole | null;
   loading: boolean;
-  login: (token: string) => Promise<void>;
+  login: (token?: string) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -35,13 +35,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Check auth on mount
   useEffect(() => {
     const initAuth = async () => {
-      const token = getToken();
-      if (token) {
-        try {
-          const userData = await authApi.me();
-          setUser(userData);
-          setAuthRole(userData.role);
-        } catch (error) {
+      try {
+        const userData = await authApi.me();
+        setUser(userData);
+        setAuthRole(userData.role);
+      } catch (error) {
+        if (getToken()) {
           console.error('Failed to fetch user:', error);
           removeToken();
           removeRole();
@@ -53,8 +52,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initAuth();
   }, []);
 
-  const login = async (token: string) => {
-    setAuthToken(token);
+  const login = async (token?: string) => {
+    if (token) setAuthToken(token);
     try {
       // Always validate role and tenant context from /auth/me after login.
       const user = await authApi.me();
@@ -78,12 +77,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const refreshUser = async () => {
-    if (getToken()) {
-      try {
-        const userData = await authApi.me();
-        setUser(userData);
-        setAuthRole(userData.role);
-      } catch (error) {
+    try {
+      const userData = await authApi.me();
+      setUser(userData);
+      setAuthRole(userData.role);
+    } catch (error) {
+      if (getToken()) {
         console.error('Failed to refresh user:', error);
         logout();
       }

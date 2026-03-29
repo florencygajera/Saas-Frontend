@@ -1,5 +1,27 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { User, LoginResponse, PlatformStats, Tenant, TenantStats, TenantAdminStats, Service, Staff, Customer, Appointment, Booking, PublicService, PaymentStartResponse, PaymentVerifyResponse, TenantProvisionResult } from './types';
+import {
+  User,
+  LoginResponse,
+  SignupRequest,
+  SignupResponse,
+  VerifyOtpResponse,
+  PlatformStats,
+  Tenant,
+  TenantStats,
+  TenantAdminStats,
+  Service,
+  Staff,
+  Customer,
+  Appointment,
+  Booking,
+  PublicService,
+  PaymentStartResponse,
+  PaymentVerifyResponse,
+  TenantProvisionResult,
+  BillingPlan,
+  Subscription,
+  Invoice,
+} from './types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001';
 const TOKEN_KEY = 'token';
@@ -27,16 +49,25 @@ const clearClientSession = () => {
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
+const getCookieValue = (name: string): string | null => {
+  if (typeof document === 'undefined') return null;
+  const cookie = document.cookie
+    .split('; ')
+    .find((entry) => entry.startsWith(`${name}=`));
+  return cookie ? decodeURIComponent(cookie.split('=')[1]) : null;
+};
+
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
+      const token = getCookieValue(TOKEN_KEY) ?? localStorage.getItem(TOKEN_KEY);
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -65,15 +96,42 @@ api.interceptors.response.use(
 // Auth API
 export const authApi = {
   login: async (email: string, password: string): Promise<LoginResponse> => {
-    const response = await api.post<LoginResponse>('/api/v1/auth/login', {
+    const response = await api.post<LoginResponse | ApiEnvelope<LoginResponse>>('/api/v1/auth/login', {
       email,
       password,
     });
-    return response.data;
+    return unwrap(response.data);
   },
 
   me: async (): Promise<User> => {
     const response = await api.get<User | ApiEnvelope<User>>('/api/v1/auth/me');
+    return unwrap(response.data);
+  },
+
+  signup: async (data: SignupRequest): Promise<SignupResponse> => {
+    const response = await api.post<SignupResponse | ApiEnvelope<SignupResponse>>('/api/v1/auth/signup', data);
+    return unwrap(response.data);
+  },
+
+  verifyOtp: async (email: string, otp: string): Promise<VerifyOtpResponse> => {
+    const response = await api.post<VerifyOtpResponse | ApiEnvelope<VerifyOtpResponse>>('/api/v1/auth/verify-otp', {
+      email,
+      otp,
+    });
+    return unwrap(response.data);
+  },
+
+  resendOtp: async (email: string): Promise<{ message?: string }> => {
+    const response = await api.post<{ message?: string } | ApiEnvelope<{ message?: string }>>('/api/v1/auth/resend-otp', {
+      email,
+    });
+    return unwrap(response.data);
+  },
+
+  forgotPassword: async (email: string): Promise<{ message?: string }> => {
+    const response = await api.post<{ message?: string } | ApiEnvelope<{ message?: string }>>('/api/v1/auth/forgot-password', {
+      email,
+    });
     return unwrap(response.data);
   },
 };
@@ -243,7 +301,7 @@ export const tenantApi = {
 export const bookingApi = {
   // Public endpoints
   getPublicServices: async (tenantId?: string): Promise<PublicService[]> => {
-    const response = await api.get<PublicService[] | ApiEnvelope<PublicService[]>>('/api/v1/bookings/public/services', {
+    const response = await api.get<PublicService[] | ApiEnvelope<PublicService[]>>('/api/v1/public/services', {
       params: tenantId ? { tenant_id: tenantId } : undefined,
     });
     return unwrap(response.data);
@@ -293,11 +351,41 @@ export const paymentApi = {
     return unwrap(response.data);
   },
 
-  verifyPayment: async (appointmentId: string, otp: string): Promise<PaymentVerifyResponse> => {
+  verifyPayment: async (paymentId: string, otp: string): Promise<PaymentVerifyResponse> => {
     const response = await api.post<PaymentVerifyResponse | ApiEnvelope<PaymentVerifyResponse>>('/api/v1/payments/verify', {
-      appointment_id: appointmentId,
+      payment_id: paymentId,
       otp,
     });
+    return unwrap(response.data);
+  },
+};
+
+export const billingApi = {
+  getPlans: async (): Promise<BillingPlan[]> => {
+    const response = await api.get<BillingPlan[] | ApiEnvelope<BillingPlan[]>>('/api/v1/billing/plans');
+    return unwrap(response.data);
+  },
+
+  getSubscription: async (): Promise<Subscription> => {
+    const response = await api.get<Subscription | ApiEnvelope<Subscription>>('/api/v1/billing/subscription');
+    return unwrap(response.data);
+  },
+
+  changePlan: async (planId: string, billingCycle: "monthly" | "yearly"): Promise<Subscription> => {
+    const response = await api.post<Subscription | ApiEnvelope<Subscription>>('/api/v1/billing/subscription/change-plan', {
+      plan_id: planId,
+      billing_cycle: billingCycle,
+    });
+    return unwrap(response.data);
+  },
+
+  getInvoices: async (): Promise<Invoice[]> => {
+    const response = await api.get<Invoice[] | ApiEnvelope<Invoice[]>>('/api/v1/billing/invoices');
+    return unwrap(response.data);
+  },
+
+  openPortal: async (): Promise<{ url: string }> => {
+    const response = await api.post<{ url: string } | ApiEnvelope<{ url: string }>>('/api/v1/billing/portal');
     return unwrap(response.data);
   },
 };

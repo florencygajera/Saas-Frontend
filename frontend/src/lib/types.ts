@@ -13,9 +13,26 @@ export interface User {
 
 // Login response
 export interface LoginResponse {
-  access_token: string;
+  access_token?: string;
   token_type: string;
   user: User;
+}
+
+export interface SignupRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface SignupResponse {
+  user_id?: string;
+  email: string;
+  message?: string;
+}
+
+export interface VerifyOtpResponse {
+  verified: boolean;
+  message?: string;
 }
 
 // Top tenant item (Platform stats)
@@ -70,7 +87,7 @@ export interface TenantStats {
   completed_count: number;
   cancelled_count: number;
   top_services: TopServiceItem[];
-  bookings_by_status?: any[];
+  bookings_by_status?: Array<{ status: string; count: number }>;
   heatmap_7x24: number[][];
 }
 
@@ -139,7 +156,8 @@ export type PublicService = Service;
 
 // Payment types
 export interface PaymentStartResponse {
-  id: string;
+  id?: string;
+  payment_id?: string;
   tenant_id: string;
   appointment_id: string;
   amount: number;
@@ -149,7 +167,7 @@ export interface PaymentStartResponse {
 }
 
 export interface PaymentVerifyRequest {
-  appointment_id: string;
+  payment_id: string;
   otp: string;
 }
 
@@ -171,5 +189,38 @@ export type PaymentStatus =
 
 // API Error
 export interface ApiError {
-  detail: string;
+  detail?: string;
+  message?: string;
+}
+
+export interface BillingPlan {
+  id: string;
+  name: string;
+  description?: string;
+  price_monthly: number;
+  price_yearly?: number;
+  currency?: string;
+  features: string[];
+  popular?: boolean;
+}
+
+export interface Subscription {
+  id: string;
+  plan_id: string;
+  plan_name: string;
+  billing_cycle: "monthly" | "yearly";
+  amount: number;
+  currency: string;
+  current_period_end?: string;
+  status: "active" | "past_due" | "cancelled" | "trialing";
+}
+
+export interface Invoice {
+  id: string;
+  date: string;
+  amount: number;
+  currency: string;
+  status: "paid" | "pending" | "failed";
+  description?: string;
+  download_url?: string;
 }

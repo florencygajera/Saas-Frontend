@@ -2,28 +2,42 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { authApi } from "@/lib/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AuthShell } from "@/components/auth/auth-shell";
-import { ArrowLeft, CheckCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
 
 export default function VerifyOtpPage() {
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") ?? "";
+
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     inputRefs.current[0]?.focus();
   }, []);
 
-  const handleSubmit = (code: string) => {
-    if (code.length < 6) return;
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+  const handleSubmit = async (code: string) => {
+    if (code.length < 6 || !email) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      await authApi.verifyOtp(email, code);
       setSuccess(true);
-    }, 1500);
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Failed to verify OTP"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (index: number, value: string) => {
@@ -40,7 +54,7 @@ export default function VerifyOtpPage() {
     }
 
     if (newOtp.every((d) => d !== "") && newOtp.join("").length === 6) {
-      handleSubmit(newOtp.join(""));
+      void handleSubmit(newOtp.join(""));
     }
   };
 
@@ -62,7 +76,17 @@ export default function VerifyOtpPage() {
     if (nextEmpty !== -1) {
       inputRefs.current[nextEmpty]?.focus();
     } else {
-      handleSubmit(newOtp.join(""));
+      void handleSubmit(newOtp.join(""));
+    }
+  };
+
+  const resendOtp = async () => {
+    if (!email) return;
+    try {
+      setError(null);
+      await authApi.resendOtp(email);
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Failed to resend OTP"));
     }
   };
 
@@ -72,7 +96,7 @@ export default function VerifyOtpPage() {
       subtitle={
         success
           ? "Your account verification is complete."
-          : "Enter the 6-digit code sent to your email."
+          : `Enter the 6-digit code sent to ${email || "your email"}.`
       }
       sideTitle="One step away from your account"
       sideDescription="Complete email verification to unlock your workspace."
@@ -90,6 +114,20 @@ export default function VerifyOtpPage() {
       }
       gradientClassName="from-cyan-700 via-blue-700 to-indigo-700"
     >
+      {!email ? (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>Missing email. Please sign up again to receive OTP.</AlertDescription>
+        </Alert>
+      ) : null}
+
+      {error ? (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
+
       {success ? (
         <div className="space-y-6 text-center">
           <div className="flex justify-center">
@@ -122,7 +160,7 @@ export default function VerifyOtpPage() {
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 onPaste={handlePaste}
                 className="h-14 w-11 text-center text-xl font-bold sm:w-12"
-                disabled={loading}
+                disabled={loading || !email}
               />
             ))}
           </div>
@@ -135,7 +173,9 @@ export default function VerifyOtpPage() {
 
           <div className="text-center text-sm">
             <span className="text-muted-foreground">Didn&apos;t receive the code? </span>
-            <button className="font-medium text-primary hover:underline">Resend</button>
+            <button onClick={resendOtp} className="font-medium text-primary hover:underline" type="button">
+              Resend
+            </button>
           </div>
         </>
       )}

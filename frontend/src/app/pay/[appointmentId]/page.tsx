@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { bookingApi, paymentApi } from "@/lib/api";
 import { Booking, PaymentVerifyResponse } from "@/lib/types";
 import { useAuth } from "@/lib/AuthContext";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,7 @@ export default function PaymentPage() {
   const [otp, setOtp] = useState("");
   const [processing, setProcessing] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState<number | null>(null);
+  const [paymentId, setPaymentId] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<PaymentVerifyResponse | null>(null);
 
   useEffect(() => {
@@ -56,8 +58,8 @@ export default function PaymentPage() {
         } else {
           setBooking(found);
         }
-      } catch (err: any) {
-        setError(err.response?.data?.detail || err.message || "Failed to load appointment.");
+      } catch (error: unknown) {
+        setError(getApiErrorMessage(error, "Failed to load appointment."));
       } finally {
         setLoading(false);
       }
@@ -71,9 +73,10 @@ export default function PaymentPage() {
       setError(null);
       const response = await paymentApi.startPayment(appointmentId);
       setPaymentAmount(response.amount);
+      setPaymentId(response.payment_id ?? response.id ?? null);
       setStep("otp");
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message || "Failed to start payment.");
+    } catch (error: unknown) {
+      setError(getApiErrorMessage(error, "Failed to start payment."));
       setStep("error");
     }
   };
@@ -85,15 +88,20 @@ export default function PaymentPage() {
     try {
       setProcessing(true);
       setError(null);
-      const response = await paymentApi.verifyPayment(appointmentId, otp);
+      if (!paymentId) {
+        setError("Payment session not initialized. Please restart payment.");
+        setProcessing(false);
+        return;
+      }
+      const response = await paymentApi.verifyPayment(paymentId, otp);
       if (response.status === "paid") {
         setReceipt(response);
         setStep("success");
       } else {
         setError(response.message || "Payment verification failed.");
       }
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message || "Invalid OTP.");
+    } catch (error: unknown) {
+      setError(getApiErrorMessage(error, "Invalid OTP."));
     } finally {
       setProcessing(false);
     }
