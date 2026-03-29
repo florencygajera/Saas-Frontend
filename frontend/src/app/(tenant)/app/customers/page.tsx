@@ -3,11 +3,14 @@
 import { useEffect, useState } from "react";
 import { tenantApi } from "@/lib/api";
 import { Customer } from "@/lib/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SectionHeader } from "@/components/dashboard/section-header";
+import { TableCard } from "@/components/dashboard/table-card";
+import { StatCard } from "@/components/dashboard/stat-card";
 import {
   Dialog,
   DialogContent,
@@ -86,6 +89,8 @@ export default function CustomersPage() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+  const emailCoverage = customers.length > 0 ? (customers.filter((customer) => !!customer.email).length / customers.length) * 100 : 0;
+  const phoneCoverage = customers.length > 0 ? (customers.filter((customer) => !!customer.phone).length / customers.length) * 100 : 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,13 +147,11 @@ export default function CustomersPage() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Customers</h1>
-          <p className="text-muted-foreground">Manage your customer database</p>
-        </div>
-        <Button
+      <SectionHeader
+        title="Customers"
+        description="Manage your customer database and contact quality."
+        action={
+          <Button
           onClick={() => {
             setEditingCustomer(null);
             setFormData({ name: "", email: "", phone: "" });
@@ -157,7 +160,14 @@ export default function CustomersPage() {
         >
           <Plus className="mr-2 h-4 w-4" />
           Add Customer
-        </Button>
+          </Button>
+        }
+      />
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard title="Total Customers" value={customers.length} trendPercent={100} trendLabel="database size" icon={<Users className="h-5 w-5" />} />
+        <StatCard title="Email Coverage" value={`${Math.round(emailCoverage)}%`} trendPercent={emailCoverage} trendLabel="profiles with email" icon={<Mail className="h-5 w-5" />} />
+        <StatCard title="Phone Coverage" value={`${Math.round(phoneCoverage)}%`} trendPercent={phoneCoverage} trendLabel="profiles with phone" icon={<Phone className="h-5 w-5" />} />
       </div>
 
       {/* Search and filters */}
@@ -179,9 +189,7 @@ export default function CustomersPage() {
         </Badge>
       </div>
 
-      {/* Table */}
-      <Card>
-        <CardContent className="p-0">
+      <TableCard title="Customer Directory" description="Search, edit, and manage customer records.">
           <Table>
             <TableHeader>
               <TableRow>
@@ -257,8 +265,7 @@ export default function CustomersPage() {
               )}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+      </TableCard>
 
       {/* Pagination */}
       {totalPages > 1 && (
