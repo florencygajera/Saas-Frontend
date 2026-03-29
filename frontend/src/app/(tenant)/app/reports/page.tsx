@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { SectionHeader } from "@/components/dashboard/section-header";
+import { TableCard } from "@/components/dashboard/table-card";
+import { StatCard } from "@/components/dashboard/stat-card";
 import {
   Select,
   SelectContent,
@@ -20,7 +22,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { KpiCard } from "@/components/widgets/kpi-card";
 import { Download, FileText, Search, Calendar, DollarSign, Users, TrendingUp, Filter } from "lucide-react";
 import { toast } from "sonner";
 
@@ -61,13 +62,11 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
-          <p className="text-muted-foreground">View and export your business reports</p>
-        </div>
-        <div className="flex gap-2">
+      <SectionHeader
+        title="Reports"
+        description="View, filter, and export business reports."
+        action={
+          <div className="flex gap-2">
           <Button variant="outline" onClick={handleExportCSV}>
             <Download className="mr-2 h-4 w-4" />
             CSV
@@ -76,27 +75,28 @@ export default function ReportsPage() {
             <FileText className="mr-2 h-4 w-4" />
             PDF
           </Button>
-        </div>
-      </div>
+          </div>
+        }
+      />
 
       {/* Summary Widgets */}
       <div className="grid gap-4 md:grid-cols-4">
-        <KpiCard
+        <StatCard
           title="Total Revenue"
           value={`$${totalRevenue.toLocaleString()}`}
           icon={<DollarSign className="h-6 w-6" />}
         />
-        <KpiCard
+        <StatCard
           title="Transactions"
           value={filteredData.length}
           icon={<TrendingUp className="h-6 w-6" />}
         />
-        <KpiCard
+        <StatCard
           title="Avg. Transaction"
           value={`$${filteredData.length > 0 ? Math.round(totalRevenue / filteredData.filter((r) => r.status === "completed").length) : 0}`}
           icon={<Calendar className="h-6 w-6" />}
         />
-        <KpiCard
+        <StatCard
           title="Completion Rate"
           value={`${Math.round((filteredData.filter((r) => r.status === "completed").length / filteredData.length) * 100)}%`}
           icon={<Users className="h-6 w-6" />}
@@ -129,8 +129,7 @@ export default function ReportsPage() {
       </div>
 
       {/* Data Table */}
-      <Card>
-        <CardContent className="p-0">
+      <TableCard title="Report Table" description="Filtered report rows by status and search query.">
           <Table>
             <TableHeader>
               <TableRow>
@@ -173,8 +172,7 @@ export default function ReportsPage() {
               )}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+      </TableCard>
     </div>
   );
 }

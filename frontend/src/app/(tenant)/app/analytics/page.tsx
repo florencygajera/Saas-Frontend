@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { KpiCard } from "@/components/widgets/kpi-card";
+import { StatCard } from "@/components/dashboard/stat-card";
+import { SectionHeader } from "@/components/dashboard/section-header";
 import { RevenueLineChart, UserGrowthChart, RetentionChart, StatusPieChart } from "@/components/widgets/charts";
 import { DollarSign, Users, TrendingUp, Repeat, Download } from "lucide-react";
 
@@ -67,17 +67,16 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Analytics</h1>
-          <p className="text-muted-foreground">Track your business performance and insights</p>
-        </div>
-        <Button variant="outline">
+      <SectionHeader
+        title="Analytics"
+        description="Track business performance with trend and retention insights."
+        action={
+          <Button variant="outline">
           <Download className="mr-2 h-4 w-4" />
           Export Report
-        </Button>
-      </div>
+          </Button>
+        }
+      />
 
       {/* Time Range Tabs */}
       <Tabs value={timeRange} onValueChange={setTimeRange}>
@@ -90,32 +89,32 @@ export default function AnalyticsPage() {
         <TabsContent value={timeRange} className="space-y-6">
           {/* KPI Cards */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <KpiCard
+            <StatCard
               title="Total Revenue"
               value={`$${totalRevenue.toLocaleString()}`}
-              change={12.5}
-              changeLabel={`vs prev ${timeRange}`}
+              trendPercent={12.5}
+              trendLabel={`vs prev ${timeRange}`}
               icon={<DollarSign className="h-6 w-6" />}
             />
-            <KpiCard
+            <StatCard
               title="Active Users"
               value="520"
-              change={8.2}
-              changeLabel="vs prev period"
+              trendPercent={8.2}
+              trendLabel="vs prev period"
               icon={<Users className="h-6 w-6" />}
             />
-            <KpiCard
+            <StatCard
               title="Growth Rate"
               value="18.5%"
-              change={3.1}
-              changeLabel="vs prev period"
+              trendPercent={3.1}
+              trendLabel="vs prev period"
               icon={<TrendingUp className="h-6 w-6" />}
             />
-            <KpiCard
+            <StatCard
               title="Retention"
               value="72%"
-              change={-2.4}
-              changeLabel="vs prev period"
+              trendPercent={-2.4}
+              trendLabel="vs prev period"
               icon={<Repeat className="h-6 w-6" />}
             />
           </div>

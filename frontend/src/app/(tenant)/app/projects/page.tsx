@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import { SectionHeader } from "@/components/dashboard/section-header";
+import { StatCard } from "@/components/dashboard/stat-card";
 import {
   Dialog,
   DialogContent,
@@ -84,6 +86,8 @@ export default function ProjectsPage() {
     memberCount: Math.floor(Math.random() * 5) + 1,
     progress: Math.floor(Math.random() * 100),
   }));
+  const avgProgress = projects.length > 0 ? projects.reduce((sum, item) => sum + item.progress, 0) / projects.length : 0;
+  const activeProjects = projects.filter((item) => item.service.is_active).length;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,13 +152,11 @@ export default function ProjectsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Projects</h1>
-          <p className="text-muted-foreground">Manage your services and workspace</p>
-        </div>
-        <Button
+      <SectionHeader
+        title="Projects"
+        description="Service-backed workspace projects with progress tracking."
+        action={
+          <Button
           onClick={() => {
             setEditingService(null);
       setFormData({ name: "", price: 0, duration_min: 30, is_active: true });
@@ -163,7 +165,14 @@ export default function ProjectsPage() {
         >
           <Plus className="mr-2 h-4 w-4" />
           New Project
-        </Button>
+          </Button>
+        }
+      />
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard title="Projects" value={projects.length} trendPercent={100} trendLabel="active workspace items" icon={<Scissors className="h-5 w-5" />} />
+        <StatCard title="Active Projects" value={activeProjects} trendPercent={projects.length ? (activeProjects / projects.length) * 100 : 0} trendLabel="active ratio" icon={<Users className="h-5 w-5" />} />
+        <StatCard title="Avg Progress" value={`${Math.round(avgProgress)}%`} trendPercent={avgProgress} trendLabel="booking progress" icon={<Clock className="h-5 w-5" />} />
       </div>
 
       {/* Search */}

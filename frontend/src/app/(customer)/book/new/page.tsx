@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SectionHeader } from "@/components/dashboard/section-header";
+import { StatCard } from "@/components/dashboard/stat-card";
 import { ArrowLeft, Clock, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 
@@ -96,12 +98,26 @@ export default function NewBookingPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <Link href="/book/home" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" />
-        Back to services
-      </Link>
+      <SectionHeader
+        title="New Booking"
+        description="Confirm schedule details before creating your booking."
+        action={
+          <Button variant="outline" asChild>
+            <Link href="/book/home">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to services
+            </Link>
+          </Button>
+        }
+      />
 
-      <Card className="max-w-2xl">
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard title="Service Price" value={`$${service.price}`} trendPercent={service.price} trendLabel="estimated amount" icon={<DollarSign className="h-5 w-5" />} />
+        <StatCard title="Duration" value={`${service.duration_min} min`} trendPercent={service.duration_min} trendLabel="slot length" icon={<Clock className="h-5 w-5" />} />
+        <StatCard title="Status" value="Ready" trendPercent={100} trendLabel="booking setup" icon={<Clock className="h-5 w-5" />} />
+      </div>
+
+      <Card className="max-w-2xl rounded-2xl border-border/70 shadow-sm">
         <CardHeader>
           <CardTitle>{service.name}</CardTitle>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">

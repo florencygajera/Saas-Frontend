@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { SectionHeader } from "@/components/dashboard/section-header";
+import { StatCard } from "@/components/dashboard/stat-card";
+import { TableCard } from "@/components/dashboard/table-card";
 import {
   Table,
   TableBody,
@@ -81,13 +84,16 @@ export default function BillingPage() {
   const handleUpgrade = (planName: string) => {
     toast.info(`Upgrade to ${planName} - Coming soon!`);
   };
+  const currentSpend = isYearly ? plans[1].price.yearly : plans[1].price.monthly;
 
   return (
     <div className="space-y-8 p-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Billing</h1>
-        <p className="text-muted-foreground">Manage your subscription and billing</p>
+      <SectionHeader title="Billing" description="Manage subscription plans, invoices, and billing preferences." />
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard title="Current Plan" value="Professional" trendPercent={isYearly ? 17 : 0} trendLabel="yearly savings" icon={<CreditCard className="h-5 w-5" />} />
+        <StatCard title="Current Spend" value={`$${currentSpend}`} trendPercent={100} trendLabel={isYearly ? "billed yearly" : "billed monthly"} icon={<Star className="h-5 w-5" />} />
+        <StatCard title="Paid Invoices" value={paymentHistory.length} trendPercent={100} trendLabel="historical payments" icon={<Download className="h-5 w-5" />} />
       </div>
 
       {/* Current Plan */}
@@ -177,20 +183,16 @@ export default function BillingPage() {
       </div>
 
       {/* Payment History */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-base font-semibold">Payment History</CardTitle>
-              <CardDescription>Your recent transactions</CardDescription>
-            </div>
-            <Button variant="outline" size="sm">
-              <Download className="mr-2 h-4 w-4" />
-              Export
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
+      <TableCard
+        title="Payment History"
+        description="Recent billing transactions"
+        action={
+          <Button variant="outline" size="sm">
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+        }
+      >
           <Table>
             <TableHeader>
               <TableRow>
@@ -213,8 +215,7 @@ export default function BillingPage() {
               ))}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+      </TableCard>
     </div>
   );
 }

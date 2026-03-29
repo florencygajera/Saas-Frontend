@@ -8,6 +8,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SectionHeader } from "@/components/dashboard/section-header";
+import { TableCard } from "@/components/dashboard/table-card";
+import { StatCard } from "@/components/dashboard/stat-card";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Calendar, Pencil, XCircle, CreditCard } from "lucide-react";
+import { Calendar, Pencil, XCircle, CreditCard, Clock3, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 const CANCELLABLE = new Set(["pending", "confirmed"]);
@@ -110,20 +113,29 @@ export default function MyBookingsPage() {
     );
   }
 
+  const upcomingCount = bookings.filter((booking) => new Date(booking.start_at) > new Date() && booking.status !== "cancelled").length;
+  const completedCount = bookings.filter((booking) => booking.status === "completed").length;
+  const cancellableCount = bookings.filter((booking) => CANCELLABLE.has(booking.status)).length;
+
   return (
     <div className="space-y-6 p-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">My Bookings</h1>
-          <p className="text-muted-foreground">Only your own bookings are shown here.</p>
-        </div>
-        <Button asChild>
+      <SectionHeader
+        title="My Bookings"
+        description="Review, edit, cancel, and pay for your active bookings."
+        action={
+          <Button asChild>
           <Link href="/book/home">Book New Service</Link>
-        </Button>
+          </Button>
+        }
+      />
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard title="Upcoming" value={upcomingCount} trendPercent={bookings.length ? (upcomingCount / bookings.length) * 100 : 0} trendLabel="future bookings" icon={<Clock3 className="h-5 w-5" />} />
+        <StatCard title="Completed" value={completedCount} trendPercent={bookings.length ? (completedCount / bookings.length) * 100 : 0} trendLabel="history share" icon={<CheckCircle2 className="h-5 w-5" />} />
+        <StatCard title="Cancellable" value={cancellableCount} trendPercent={bookings.length ? (cancellableCount / bookings.length) * 100 : 0} trendLabel="editable entries" icon={<Calendar className="h-5 w-5" />} />
       </div>
 
-      <Card>
-        <CardContent className="p-0">
+      <TableCard title="Booking List" description="Only bookings tied to your account are shown.">
           <Table>
             <TableHeader>
               <TableRow>
@@ -176,8 +188,7 @@ export default function MyBookingsPage() {
               )}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+      </TableCard>
 
       <Dialog open={!!rescheduleTarget} onOpenChange={() => setRescheduleTarget(null)}>
         <DialogContent>

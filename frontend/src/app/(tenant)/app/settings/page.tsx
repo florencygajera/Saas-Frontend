@@ -42,6 +42,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import { toast } from "sonner";
+import { SectionHeader } from "@/components/dashboard/section-header";
+import { StatCard } from "@/components/dashboard/stat-card";
 
 const teamMembers = [
   { id: "1", name: "John Smith", email: "john@business.com", role: "Admin", status: "active" },
@@ -67,10 +69,12 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground">Manage your account and preferences</p>
+      <SectionHeader title="Settings" description="Manage account profile, team access, security, and API controls." />
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard title="Team Members" value={teamMembers.length} trendPercent={100} trendLabel="workspace members" icon={<Users className="h-5 w-5" />} />
+        <StatCard title="API Keys" value={apiKeys.length} trendPercent={apiKeys.length * 10} trendLabel="active keys" icon={<Key className="h-5 w-5" />} />
+        <StatCard title="Security Controls" value="2FA Ready" trendPercent={80} trendLabel="recommended setup" icon={<Shield className="h-5 w-5" />} />
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">

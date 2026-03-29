@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { SectionHeader } from "@/components/dashboard/section-header";
+import { StatCard } from "@/components/dashboard/stat-card";
 import { ArrowLeft, Loader2, CheckCircle } from "lucide-react";
 
 type PaymentStep = "summary" | "processing" | "otp" | "success" | "error";
@@ -123,12 +125,26 @@ export default function PaymentPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <Link href="/book/my-bookings" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" />
-        Back to My Bookings
-      </Link>
+      <SectionHeader
+        title="Appointment Payment"
+        description="Secure OTP payment verification flow."
+        action={
+          <Button variant="outline" asChild>
+            <Link href="/book/my-bookings">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to My Bookings
+            </Link>
+          </Button>
+        }
+      />
 
-      <Card className="max-w-xl">
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard title="Appointment" value={booking.id.slice(0, 8)} trendPercent={100} trendLabel="payment target" />
+        <StatCard title="Current Step" value={step.toUpperCase()} trendPercent={step === "success" ? 100 : step === "otp" ? 75 : 25} trendLabel="flow status" />
+        <StatCard title="Amount" value={paymentAmount ? `$${paymentAmount.toFixed(2)}` : "Pending"} trendPercent={paymentAmount ?? 0} trendLabel="after initialization" />
+      </div>
+
+      <Card className="max-w-xl rounded-2xl border-border/70 shadow-sm">
         <CardHeader>
           <CardTitle>Appointment Payment</CardTitle>
         </CardHeader>

@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { tenantApi } from "@/lib/api";
 import { Appointment, AppointmentStatus } from "@/lib/types";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SectionHeader } from "@/components/dashboard/section-header";
+import { TableCard } from "@/components/dashboard/table-card";
+import { StatCard } from "@/components/dashboard/stat-card";
 import {
   Select,
   SelectContent,
@@ -22,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Calendar, RefreshCw } from "lucide-react";
+import { Calendar, RefreshCw, Clock3, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 const STATUS_OPTIONS: AppointmentStatus[] = ["pending", "confirmed", "in_progress", "completed", "cancelled"];
@@ -81,6 +83,9 @@ export default function AppointmentsPage() {
         return [];
     }
   };
+  const pending = appointments.filter((appointment) => appointment.status === "pending").length;
+  const completed = appointments.filter((appointment) => appointment.status === "completed").length;
+  const cancelled = appointments.filter((appointment) => appointment.status === "cancelled").length;
 
   if (loading) {
     return (
@@ -93,19 +98,25 @@ export default function AppointmentsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Appointments</h1>
-          <p className="text-muted-foreground">Manage your appointments and bookings</p>
-        </div>
-        <Button variant="outline" onClick={fetchAppointments}>
+      <SectionHeader
+        title="Appointments"
+        description="Manage upcoming appointments and status transitions."
+        action={
+          <Button variant="outline" onClick={fetchAppointments}>
           <RefreshCw className="mr-2 h-4 w-4" />
           Refresh
-        </Button>
+          </Button>
+        }
+      />
+
+      <div className="grid gap-4 md:grid-cols-4">
+        <StatCard title="Total" value={appointments.length} trendPercent={100} trendLabel="all appointments" icon={<Calendar className="h-5 w-5" />} />
+        <StatCard title="Pending" value={pending} trendPercent={appointments.length ? (pending / appointments.length) * 100 : 0} trendLabel="awaiting action" icon={<Clock3 className="h-5 w-5" />} />
+        <StatCard title="Completed" value={completed} trendPercent={appointments.length ? (completed / appointments.length) * 100 : 0} trendLabel="completion share" icon={<CheckCircle2 className="h-5 w-5" />} />
+        <StatCard title="Cancelled" value={cancelled} trendPercent={appointments.length ? -((cancelled / appointments.length) * 100) : 0} trendLabel="cancellation share" icon={<XCircle className="h-5 w-5" />} />
       </div>
 
-      <Card>
-        <CardContent className="p-0">
+      <TableCard title="Appointment Queue" description="Update statuses based on allowed flow transitions.">
           <Table>
             <TableHeader>
               <TableRow>
@@ -156,8 +167,7 @@ export default function AppointmentsPage() {
               )}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+      </TableCard>
     </div>
   );
 }
