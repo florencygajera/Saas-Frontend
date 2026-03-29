@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/table";
 import { Calendar, RefreshCw, Clock3, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 const STATUS_OPTIONS: AppointmentStatus[] = ["pending", "confirmed", "in_progress", "completed", "cancelled"];
 
@@ -47,8 +48,8 @@ export default function AppointmentsPage() {
       setLoading(true);
       const data = await tenantApi.getAppointments();
       setAppointments(data);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to load appointments");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to load appointments"));
     } finally {
       setLoading(false);
     }
@@ -64,8 +65,8 @@ export default function AppointmentsPage() {
       await tenantApi.updateAppointmentStatus(appointmentId, newStatus);
       toast.success("Status updated");
       await fetchAppointments();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to update status");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to update status"));
     } finally {
       setUpdating(null);
     }
@@ -171,3 +172,4 @@ export default function AppointmentsPage() {
     </div>
   );
 }
+

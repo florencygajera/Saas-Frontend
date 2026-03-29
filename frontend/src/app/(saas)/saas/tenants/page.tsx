@@ -21,6 +21,7 @@ import {
 import Link from "next/link";
 import { Plus, Search, Building2, CheckCircle2, PauseCircle, Layers } from "lucide-react";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export default function TenantsPage() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
@@ -32,8 +33,8 @@ export default function TenantsPage() {
       setLoading(true);
       const data = await saasApi.getTenants();
       setTenants(data);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to load tenants");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to load tenants"));
     } finally {
       setLoading(false);
     }
@@ -48,8 +49,8 @@ export default function TenantsPage() {
       await saasApi.updateTenant(tenant.id, { is_active: !tenant.is_active });
       toast.success(`Tenant ${tenant.is_active ? "deactivated" : "activated"}`);
       await fetchTenants();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to update tenant");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to update tenant"));
     }
   };
 
@@ -155,3 +156,4 @@ export default function TenantsPage() {
     </div>
   );
 }
+

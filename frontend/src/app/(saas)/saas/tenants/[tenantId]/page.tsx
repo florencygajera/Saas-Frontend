@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { saasApi } from "@/lib/api";
 import { TenantStats } from "@/lib/types";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -28,8 +29,8 @@ export default function TenantStatsPage() {
       setLoading(true);
       const data = await saasApi.getTenantStats(tenantId);
       setStats(data);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to load tenant stats");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to load tenant stats"));
     } finally {
       setLoading(false);
     }

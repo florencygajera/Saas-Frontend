@@ -36,6 +36,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Plus, Search, MoreHorizontal, Edit2, Trash2, UserCheck, Users, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export default function StaffPage() {
   const [staff, setStaff] = useState<Staff[]>([]);
@@ -52,8 +53,8 @@ export default function StaffPage() {
       setLoading(true);
       const data = await tenantApi.getStaff();
       setStaff(data);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to load staff");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to load staff"));
     } finally {
       setLoading(false);
     }
@@ -84,8 +85,8 @@ export default function StaffPage() {
       setEditingStaff(null);
             setFormData({ name: "", is_active: true });
       fetchStaff();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to save staff");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to save staff"));
     } finally {
       setSubmitting(false);
     }
@@ -104,8 +105,8 @@ export default function StaffPage() {
       toast.success("Staff deleted successfully");
       setDeleteConfirm(null);
       fetchStaff();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to delete staff");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to delete staff"));
     }
   };
 
@@ -251,3 +252,4 @@ export default function StaffPage() {
     </div>
   );
 }
+

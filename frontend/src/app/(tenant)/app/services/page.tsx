@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Plus, Search, MoreHorizontal, Edit2, Trash2, Scissors, CircleDollarSign, Clock3 } from "lucide-react";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
@@ -56,8 +57,8 @@ export default function ServicesPage() {
       setLoading(true);
       const data = await tenantApi.getServices();
       setServices(data);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to load services");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to load services"));
     } finally {
       setLoading(false);
     }
@@ -90,8 +91,8 @@ export default function ServicesPage() {
       setEditingService(null);
             setFormData({ name: "", price: 0, duration_min: 30, is_active: true });
       fetchServices();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to save service");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to save service"));
     } finally {
       setSubmitting(false);
     }
@@ -115,8 +116,8 @@ export default function ServicesPage() {
       toast.success("Service deleted successfully");
       setDeleteConfirm(null);
       fetchServices();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to delete service");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to delete service"));
     }
   };
 
@@ -305,3 +306,4 @@ export default function ServicesPage() {
     </div>
   );
 }
+

@@ -21,6 +21,7 @@ import {
 import { Building2, Users, DollarSign, Calendar, RefreshCw, ArrowRight, LineChart as LineChartIcon } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/lib/api-error";
 import {
   CartesianGrid,
   Line,
@@ -105,8 +106,8 @@ export default function SaaSDashboard() {
         })
       );
       setTopTenantRows(topWithBookings);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to load data");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to load data"));
     } finally {
       setLoading(false);
     }
@@ -282,3 +283,4 @@ export default function SaaSDashboard() {
     </div>
   );
 }
+

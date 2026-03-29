@@ -16,6 +16,7 @@ import { SectionHeader } from "@/components/dashboard/section-header";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { ArrowLeft, Clock, DollarSign } from "lucide-react";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export default function NewBookingPage() {
   const searchParams = useSearchParams();
@@ -40,8 +41,8 @@ export default function NewBookingPage() {
         setLoading(true);
         const services = await bookingApi.getPublicServices(user?.tenant_id);
         setService(services.find((s) => s.id === serviceId) || null);
-      } catch (err: any) {
-        setError(err.response?.data?.detail || err.message || "Failed to load service");
+      } catch (error: unknown) {
+        setError(getApiErrorMessage(error, "Failed to load service"));
       } finally {
         setLoading(false);
       }
@@ -64,8 +65,8 @@ export default function NewBookingPage() {
       });
       toast.success("Booking created successfully.");
       router.push("/book/my-bookings");
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message || "Failed to create booking");
+    } catch (error: unknown) {
+      setError(getApiErrorMessage(error, "Failed to create booking"));
     } finally {
       setSubmitting(false);
     }
@@ -163,3 +164,4 @@ export default function NewBookingPage() {
     </div>
   );
 }
+

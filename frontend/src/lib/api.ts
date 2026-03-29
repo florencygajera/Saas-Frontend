@@ -41,7 +41,6 @@ const unwrap = <T>(payload: T | ApiEnvelope<T>): T => {
 
 const clearClientSession = () => {
   if (typeof window === 'undefined') return;
-  localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(ROLE_KEY);
   document.cookie = `${TOKEN_KEY}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; samesite=lax`;
   document.cookie = `${ROLE_KEY}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; samesite=lax`;
@@ -67,7 +66,7 @@ const getCookieValue = (name: string): string | null => {
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== 'undefined') {
-      const token = getCookieValue(TOKEN_KEY) ?? localStorage.getItem(TOKEN_KEY);
+      const token = getCookieValue(TOKEN_KEY);
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }

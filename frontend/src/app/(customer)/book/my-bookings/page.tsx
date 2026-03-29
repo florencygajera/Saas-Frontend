@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/table";
 import { Calendar, Pencil, XCircle, CreditCard, Clock3, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 const CANCELLABLE = new Set(["pending", "confirmed"]);
 
@@ -48,8 +49,8 @@ export default function MyBookingsPage() {
       setError(null);
       const data = await bookingApi.getMyBookings();
       setBookings(data);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message || "Failed to load bookings");
+    } catch (error: unknown) {
+      setError(getApiErrorMessage(error, "Failed to load bookings"));
     } finally {
       setLoading(false);
     }
@@ -64,8 +65,8 @@ export default function MyBookingsPage() {
       await bookingApi.cancelBooking(id);
       toast.success("Booking cancelled.");
       fetchBookings();
-    } catch (err: any) {
-      toast.error(err.response?.data?.detail || err.message || "Failed to cancel booking");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to cancel booking"));
     }
   };
 
@@ -84,8 +85,8 @@ export default function MyBookingsPage() {
       toast.success("Booking rescheduled.");
       setRescheduleTarget(null);
       fetchBookings();
-    } catch (err: any) {
-      toast.error(err.response?.data?.detail || err.message || "Failed to reschedule booking");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to reschedule booking"));
     } finally {
       setSaving(false);
     }
@@ -218,3 +219,4 @@ export default function MyBookingsPage() {
     </div>
   );
 }
+

@@ -16,6 +16,7 @@ import { Calendar, Clock, DollarSign, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export default function CustomerHome() {
   const { user } = useAuth();
@@ -55,8 +56,8 @@ export default function CustomerHome() {
       ]);
       setServices(serviceData);
       setBookings(bookingData);
-    } catch (err: any) {
-      const message = err.response?.data?.detail || err.message || "Failed to load dashboard";
+    } catch (error: unknown) {
+      const message = getApiErrorMessage(error, "Failed to load dashboard");
       setError(message);
       toast.error(message);
     } finally {
@@ -264,3 +265,4 @@ export default function CustomerHome() {
     </div>
   );
 }
+

@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, DollarSign, CheckCircle2, XCircle, RefreshCw, ArrowRight } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 function DashboardSkeleton() {
   return (
@@ -54,8 +55,8 @@ export default function TenantDashboard() {
       setError(null);
       const data = await tenantApi.getStats();
       setStats(data);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message || "Failed to load tenant stats");
+    } catch (error: unknown) {
+      setError(getApiErrorMessage(error, "Failed to load tenant stats"));
     } finally {
       setLoading(false);
     }
@@ -212,3 +213,4 @@ export default function TenantDashboard() {
     </div>
   );
 }
+

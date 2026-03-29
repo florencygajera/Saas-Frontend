@@ -47,6 +47,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -66,8 +67,8 @@ export default function CustomersPage() {
       setLoading(true);
       const data = await tenantApi.getCustomers();
       setCustomers(data);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to load customers");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to load customers"));
     } finally {
       setLoading(false);
     }
@@ -107,8 +108,8 @@ export default function CustomersPage() {
       setEditingCustomer(null);
       setFormData({ name: "", email: "", phone: "" });
       fetchCustomers();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to save customer");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to save customer"));
     } finally {
       setSubmitting(false);
     }
@@ -127,8 +128,8 @@ export default function CustomersPage() {
       toast.success("Customer deleted successfully");
       setDeleteConfirm(null);
       fetchCustomers();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to delete customer");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to delete customer"));
     }
   };
 
@@ -373,3 +374,4 @@ export default function CustomersPage() {
     </div>
   );
 }
+

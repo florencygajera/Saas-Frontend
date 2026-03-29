@@ -21,6 +21,7 @@ import {
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 const tenantSchema = z.object({
   name: z.string().min(1, "Tenant name is required"),
@@ -71,8 +72,8 @@ export default function NewTenantPage() {
         admin_password: provision.temp_password || data.admin_password,
       });
       toast.success("Tenant provisioned successfully!");
-    } catch (err: any) {
-      toast.error(err.response?.data?.detail || err.message || "Failed to create tenant");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to create tenant"));
     } finally {
       setLoading(false);
     }
@@ -205,3 +206,4 @@ export default function NewTenantPage() {
     </div>
   );
 }
+
