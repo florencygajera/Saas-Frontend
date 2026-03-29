@@ -135,7 +135,7 @@ export default function SignupPage() {
               type={showPassword ? "text" : "password"}
               {...register("password")}
               className="pl-10 pr-10"
-              placeholder="••••••••"
+              placeholder="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
             />
             <button
               type="button"
@@ -157,7 +157,7 @@ export default function SignupPage() {
               type="password"
               {...register("confirmPassword")}
               className="pl-10"
-              placeholder="••••••••"
+              placeholder="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
             />
           </div>
           {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>}
